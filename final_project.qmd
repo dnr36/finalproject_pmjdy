@@ -1,0 +1,302 @@
+---
+title: "Data Science for Public Policy"
+subtitle: "Final Project: Predicting the PMJDY Takeup Rate in India"
+author: "Meenakshi Alagusundaram - ma2309, Sanya Bahal - sb2063, Diana Rivas - dnr36, Sona Sarin - srs368"
+execute:
+  warning: false
+format:
+  html:
+    embed-resources: true
+---
+
+# Loading Libraries
+
+```{r Libraries }
+library(tidyverse)
+library(haven)
+library(dplyr)
+library(ggplot2)
+library(tidymodels)
+library(readr)  
+library(ranger)
+```
+
+# Set Up
+
+### Preparing data
+
+```{r Prepping data }
+
+pmjdy <- read_dta("PMJDYmaster.dta") %>%
+  filter(!year == 2021)
+
+# Changing all variable names to lower case
+names(pmjdy) <- tolower(names(pmjdy))
+
+
+# Splitting data into training and testing data 
+set.seed(2588596)
+
+pmjdy_split <- initial_split(data = pmjdy, prop = 0.8)
+
+# Creating the training and testing data
+df_train <- training(x = pmjdy_split)
+df_test  <- testing(x = pmjdy_split)
+
+# Cross validation folds, tried to stratify by state but the data is too small 
+folds <- vfold_cv(df_train, v=10)
+
+```
+
+### EDA through data visualization
+
+```{r EDA }
+
+# Employment vs Literacy for state Delhi 
+
+delhi_data <- df_train[df_train$state == "Delhi", ]
+
+# Create the plot
+eda1 <- ggplot(delhi_data, aes(x = educationindex, y = employment)) +
+  geom_point() +  # Adds the dot plot
+  geom_smooth(method = "lm", se = FALSE, color = "blue") +  
+  labs(x = "Literacy Rate", y = "Employment Rate", title = "Employment vs Literacy in Delhi") +
+  theme_minimal()  
+
+# employment vs literacy for all states for the year 2019 
+
+data_2019 <- df_train[df_train$year == 2019, ]
+
+# Create the plot for all states
+eda2 <- ggplot(data_2019, aes(x = educationindex, y = employment, color = state)) +
+  geom_point() +  
+  geom_smooth(method = "lm", se = FALSE, color = "black") +  
+  labs(x = "Literacy Rate", y = "Employment Rate", title = "Employment vs Literacy Across States for 2019") +
+  theme_minimal() +  # Uses a minimal theme for the plot
+  theme(legend.position = "bottom") 
+
+# pmjdy beneficiary rate over 2016 - 2020 
+# Calculating the mean of 'pmjdy' for each year
+annual_means <- df_train %>%
+  group_by(year) %>%
+  summarize(mean_pmjdy = mean(pmjdy, na.rm = TRUE))  
+
+# Plotting the annual mean of 'pmjdy'
+eda3 <- ggplot(annual_means, aes(x = year, y = mean_pmjdy)) +
+  geom_line(color = "blue", size = 1) +  # Adds a blue line connecting the mean values
+  geom_point(color = "red", size = 3) +  # Adds red points for each yearly mean
+  labs(x = "Year", y = "PMJDY", title = "Beneficiary rate of PMJDY from 2016 to 2020") +
+  theme_minimal() +
+  theme(legend.position = "none")  # No need for a legend  
+
+eda1
+
+eda2
+
+eda3
+
+```
+
+### EDA1
+
+In Delhi, the data plotted annually showcases a consistent trend where higher literacy rates align with higher employment rates. This correlation remains evident across different years, highlighting an ongoing relationship between educational achievements and job opportunities in the capital. Each year, as literacy improves, there is a corresponding rise in employment, suggesting that education plays a crucial role in enhancing employability.
+
+### EDA 2
+
+At the national level, the dot plot for different states presents a broader picture of how literacy impacts employment across India. States with higher literacy rates generally report higher employment rates. This trend holds true across various regions, emphasizing that the correlation observed in Delhi is not an isolated case but rather a widespread pattern.
+
+### EDA 3
+
+The graph presents the PMJDY beneficiary rate from 2016 to 2020, showing a clear upward trajectory in the number of beneficiaries. This trend is captured through annual data points, each representing the mean value of beneficiaries for that year, aggregated across all states. The rise in the beneficiary rate could be attributed to several factors, including enhanced government campaigns, increased awareness among the populace, and improvements in the banking infrastructure, especially in rural and semi-urban areas.
+
+##  Error Metric
+
+### RMSE 
+
+RMSE (Root Mean Squared Error) measures the average magnitude of the errors between predicted values and observed values, squaring the differences to avoid canceling out negative and positive discrepancies, and taking the square root of the result. This metric gives a relatively high weight to large errors, making it useful when large errors are particularly undesirable. A lower RMSE value indicates better fit as it reflects a smaller difference between predicted and observed values. The scale of the RMSE is the same as the dependent variable, making it somewhat interpretable in terms of the variable being predicted.
+
+### Understanding of costs 
+
+Resource Allocation: Incorrect predictions can lead to misdirected resources. Overestimating the PMJDY take-up rates in a state might lead policymakers to believe that financial inclusion efforts are more successful than they actually are, potentially causing a reduction in much-needed support and resources. Conversely, underestimating the take-up rates could lead to an unnecessary surge in resources directed to areas that might already be adequately served.\
+
+### False Positives (Overestimation)
+
+Predicting a higher than actual take-up rate may cause policymakers to overlook areas in need, assuming that the financial inclusion objectives have been met. This can lead to complacency and a lack of necessary interventions, leaving certain populations underserved. #False Negatives (Underestimation): Predicting a lower than actual take-up rate might trigger excessive focus and investment in regions that are already performing well, thus diverting attention and resources from regions that genuinely require intervention and support.\
+
+### Tolerance Levels
+
+For a government project like PMJDY, which aims at broad financial inclusion, the tolerance for error should ideally be low to ensure that interventions are appropriately targeted. The RMSE should be minimized to a level where the predictions do not mislead policy decisions or lead to significant misallocations of resources.
+
+### What could be more costly? 
+
+Given that PMJDY's main goal is to ensure universal access to financial services, a false positive leading to under-provision of resources in areas still needing support poses a significant risk. It can directly counteract the mission of financial inclusivity, leaving vulnerable populations without essential financial services. This not only hampers individual economic opportunities but can also widen economic disparities.\
+\
+
+# Models
+
+```{r Recipe }
+
+# Creating a recipe 
+
+pmjdy_rec <- recipe(pmjdy ~ state + year + incomeindex + educationindex, df_train)%>%
+  step_dummy(state) %>%
+  step_normalize(all_numeric(), -all_outcomes())
+
+
+```
+
+### Decision tree model
+
+```{r Decision tree model }
+
+# Decision tree specification 
+dt_spec <- decision_tree() %>%
+  set_engine("rpart") %>%
+  set_mode("regression")
+
+# Decision tree workflow 
+dt_wf <- workflow() %>%
+  add_recipe(pmjdy_rec) %>%
+  add_model(dt_spec)
+
+# Fitting decision tree
+dt_fit_rs <- dt_wf %>%
+  fit_resamples(resamples = folds,
+                control = control_resamples(save_pred = TRUE),
+                metrics = metric_set(rmse, mae,rsq))
+
+# Decision tree metrics
+dt_metrics <- collect_metrics(dt_fit_rs, summarize = FALSE)
+
+
+# Caculating mean rsme
+tree_mean_rmse <- dt_metrics %>%
+  filter(.metric == "rmse") %>%
+  pull(.estimate) %>%
+  mean()
+
+```
+
+### Lasso model with hyper parameter tuning
+
+```{r Lasso model }
+# Lasso specification
+
+lasso_mod <- linear_reg(penalty = tune(), mixture = tune()) %>%
+    set_engine("glmnet") %>%
+  set_mode("regression")
+
+# Workflow and tuning grid 
+
+lasso_mod_wf <- workflow() %>%
+    add_model(spec = lasso_mod) %>%
+    add_recipe(recipe = pmjdy_rec)
+    
+    # creating tuning grid 
+    grid <- grid_regular(penalty(), mixture(), levels = 10)
+
+# Fitting model 
+    
+lasso_fit_rs <- lasso_mod_wf %>%
+    tune_grid(resamples = folds, 
+              grid = grid, 
+              control = control_grid(save_pred = TRUE),
+              metrics = metric_set(rmse))   
+
+# Calculating metrics 
+
+lasso_metrics <- lasso_fit_rs %>%
+    collect_metrics(summarize = FALSE)
+
+# Calculating mean RMSE for Lasso
+
+lasso_mean_rmse <- lasso_metrics %>%
+  filter(.metric == "rmse") %>%
+  pull(.estimate) %>%
+  mean()
+
+```
+
+### Random forest model
+
+```{r Random forest model }
+# Define the model specification
+rf_spec <- rand_forest(trees = 1000) %>%
+  set_mode("regression") %>%
+  set_engine("ranger")
+
+# Set up the workflow
+rf_wf <- workflow() %>%
+  add_recipe(pmjdy_rec) %>%
+  add_model(rf_spec)
+
+# Fitting model 
+rf_fit_rs <- rf_wf %>%
+    fit_resamples(resamples = folds)
+
+# Calculating metrics 
+rf_metrics <- rf_fit_rs %>%
+    collect_metrics(summarize = FALSE)
+
+# Mean rmse 
+rf_mean_rmse <- rf_metrics %>%
+  filter(.metric == "rmse") %>%
+  pull(.estimate) %>%
+  mean()
+
+```
+
+### Visualizing the models
+
+```{r Visualizing the models }
+
+# Visualizing all models
+
+ggplot() +
+geom_point(data = lasso_metrics %>% filter(.metric == "rmse"), aes(x= id, y =.estimate, color = "Lasso")) +
+geom_point(data = dt_metrics %>% filter(.metric == "rmse"), aes(x= id, y =.estimate, color = "Tree")) +
+geom_point(data = rf_metrics %>% filter(.metric == "rmse"), aes(x= id, y =.estimate, color = "KNN")) +
+labs( title = "RMSE by model and by fold", color = "Model", x = "Fold", y = "Estimate" )
+
+
+```
+
+# Estimation
+
+```{r Estimations }
+# Selecting best models, however from the calculation of the mean RMSE above, we know that lasso leads to the lowest root mean square error 
+
+best_lasso <- lasso_fit_rs %>%
+  select_best(metric = "rmse") 
+
+final_lasso <- finalize_workflow(
+  lasso_mod_wf,
+  best_lasso) %>%
+    fit(data = df_train)
+
+# Making predictions on the testing data
+predictions <- 
+    bind_cols(
+        df_test, 
+        predict(object = final_lasso, new_data = df_test)
+    )
+
+# Printing results
+predictions %>%
+  select(pmjdy, .pred) %>%
+  print()
+
+# Evaluating model 
+ predictions %>%
+  metrics(truth = pmjdy, estimate = .pred)
+```
+
+# Interpretation
+
+This model has a high R squared with somewhat low RMSE compared to the other models. This means it can be an adequate model to predict the take up of the PMJDY program. We can see that the predictions are a few percentage points off, so although the prediction is approximately accurate, it is important to note that the predictions are not very precise.
+
+For the context of this program, this model can be used to predict the take up of the program in a certain place. The model would be a helpful tool because it can approximately predict if there will be a high enough take up rate that will make the investment/government expenditure worth it.\
+\
+To make our models more efficient, we would make use od feature engineering techniques like data imputation that helps us deal with missing values and normalizing or standardizing numerical features to ensure they have a similar scale.
+
+Models that we can try next to improve upon our results are KNN and CART models. If there are clear clusters or patterns in the feature space that could be captured by the nearest neighbors, KNN may perform well. Decision trees like CART can capture non-linear relationships between features and the target variable, making them suitable for data sets with complex decision boundaries.
