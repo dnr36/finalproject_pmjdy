@@ -34,6 +34,20 @@ library(rlang)
 pmjdy <- read_dta("PMJDYmaster.dta") %>%
   filter(!year == 2021) 
 
+#editing latitude and longitude data 
+pmjdy <- pmjdy %>%
+  mutate(
+    Latitude = case_when(
+      Latitude == 18.9 ~ 19.8,
+      Latitude == 17.5 ~ 15.9,
+      TRUE ~ Latitude  
+    ),
+    Longitude = case_when(
+      Longitude == 72.8 ~ 75.7, 
+      Longitude == 78.6 ~ 79.7,
+      TRUE ~ Longitude  
+    )
+  )
 
 # Changing all variable names to lower case
 names(pmjdy) <- tolower(names(pmjdy))
@@ -42,6 +56,7 @@ names(pmjdy) <- tolower(names(pmjdy))
 sf_pmjdy <- st_as_sf(pmjdy, coords = c("longitude", "latitude")) %>%
   st_set_crs(4326)
 
+<<<<<<< HEAD
 #editing latitude and longitude data 
 pmjdy <- pmjdy %>%
   mutate(
@@ -56,6 +71,9 @@ pmjdy <- pmjdy %>%
       TRUE ~ longitude  # Keeps original value if conditions are not met
     )
   )
+=======
+
+>>>>>>> origin/main
 
 ```
 
