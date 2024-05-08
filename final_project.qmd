@@ -33,14 +33,6 @@ library(ggthemes)
 pmjdy <- read_dta("PMJDYmaster.dta") %>%
   filter(!year == 2021) 
 
-
-# Changing all variable names to lower case
-names(pmjdy) <- tolower(names(pmjdy))
-
-# Making a SF to conduct geospatial analysis 
-sf_pmjdy <- st_as_sf(pmjdy, coords = c("longitude", "latitude")) %>%
-  st_set_crs(4326)
-
 #editing latitude and longitude data 
 pmjdy <- pmjdy %>%
   mutate(
@@ -55,6 +47,15 @@ pmjdy <- pmjdy %>%
       TRUE ~ Longitude  
     )
   )
+
+# Changing all variable names to lower case
+names(pmjdy) <- tolower(names(pmjdy))
+
+# Making a SF to conduct geospatial analysis 
+sf_pmjdy <- st_as_sf(pmjdy, coords = c("longitude", "latitude")) %>%
+  st_set_crs(4326)
+
+
 
 ```
 
