@@ -19,6 +19,9 @@ library(ggplot2)
 library(tidymodels)
 library(readr)  
 library(ranger)
+library(sf)
+library(rgeoboundaries)
+library(ggthemes)
 ```
 
 # Set Up
@@ -28,12 +31,66 @@ library(ranger)
 ```{r Prepping data }
 
 pmjdy <- read_dta("PMJDYmaster.dta") %>%
-  filter(!year == 2021)
+  filter(!year == 2021) 
+
 
 # Changing all variable names to lower case
 names(pmjdy) <- tolower(names(pmjdy))
 
+# Making a SF to conduct geospatial analysis 
+sf_pmjdy <- st_as_sf(pmjdy, coords = c("longitude", "latitude")) %>%
+  st_set_crs(4326)
 
+```
+
+# Geospatial Analysis
+
+```{r}
+# Loading data for the map of India 
+india <- geoboundaries(
+  country = "India",
+  adm_lvl = "adm1",
+  type = "simplified"
+  )
+
+# Some of the names contain special characters not found in the main PMJDY data set 
+india <- india %>%
+  mutate(shapeName = case_when(
+    shapeName == "Mahārāshtra" ~ "Maharashtra", 
+    shapeName == "Nāgāland" ~ "Nagaland",
+    TRUE ~ shapeName
+  ))
+
+# Displaying map of India
+ggplot(data = india) +
+  geom_sf()
+
+# Setting crs as the same from sf_pmjdy to ensure spatial join is done correctly 
+india <- st_transform(india, crs = st_crs(sf_pmjdy))
+
+# Spatial join 
+india_pmjdy <- st_join(india, sf_pmjdy)
+
+# Creating a choropleth 
+
+india_pmjdy %>%
+    ggplot() +
+    geom_sf(aes(fill = educationindex), color = "darkorange3", size = 0.1) +
+    scale_fill_gradient(
+        low = "white", 
+        high = "darkgreen",
+    ) +
+    theme_void()
+
+```
+
+# Supervised Machine Learning Models 
+
+### Set Up for Models and EDA through data visualization
+
+```{r Supervised ML and EDA }
+
+# Employment vs Literacy for state Delhi 
 # Splitting data into training and testing data 
 set.seed(2588596)
 
@@ -46,13 +103,6 @@ df_test  <- testing(x = pmjdy_split)
 # Cross validation folds, tried to stratify by state but the data is too small 
 folds <- vfold_cv(df_train, v=10)
 
-```
-
-### EDA through data visualization
-
-```{r EDA }
-
-# Employment vs Literacy for state Delhi 
 
 delhi_data <- df_train[df_train$state == "Delhi", ]
 
@@ -97,40 +147,7 @@ eda3
 
 ```
 
-### EDA1
 
-In Delhi, the data plotted annually showcases a consistent trend where higher literacy rates align with higher employment rates. This correlation remains evident across different years, highlighting an ongoing relationship between educational achievements and job opportunities in the capital. Each year, as literacy improves, there is a corresponding rise in employment, suggesting that education plays a crucial role in enhancing employability.
-
-### EDA 2
-
-At the national level, the dot plot for different states presents a broader picture of how literacy impacts employment across India. States with higher literacy rates generally report higher employment rates. This trend holds true across various regions, emphasizing that the correlation observed in Delhi is not an isolated case but rather a widespread pattern.
-
-### EDA 3
-
-The graph presents the PMJDY beneficiary rate from 2016 to 2020, showing a clear upward trajectory in the number of beneficiaries. This trend is captured through annual data points, each representing the mean value of beneficiaries for that year, aggregated across all states. The rise in the beneficiary rate could be attributed to several factors, including enhanced government campaigns, increased awareness among the populace, and improvements in the banking infrastructure, especially in rural and semi-urban areas.
-
-##  Error Metric
-
-### RMSE 
-
-RMSE (Root Mean Squared Error) measures the average magnitude of the errors between predicted values and observed values, squaring the differences to avoid canceling out negative and positive discrepancies, and taking the square root of the result. This metric gives a relatively high weight to large errors, making it useful when large errors are particularly undesirable. A lower RMSE value indicates better fit as it reflects a smaller difference between predicted and observed values. The scale of the RMSE is the same as the dependent variable, making it somewhat interpretable in terms of the variable being predicted.
-
-### Understanding of costs 
-
-Resource Allocation: Incorrect predictions can lead to misdirected resources. Overestimating the PMJDY take-up rates in a state might lead policymakers to believe that financial inclusion efforts are more successful than they actually are, potentially causing a reduction in much-needed support and resources. Conversely, underestimating the take-up rates could lead to an unnecessary surge in resources directed to areas that might already be adequately served.\
-
-### False Positives (Overestimation)
-
-Predicting a higher than actual take-up rate may cause policymakers to overlook areas in need, assuming that the financial inclusion objectives have been met. This can lead to complacency and a lack of necessary interventions, leaving certain populations underserved. #False Negatives (Underestimation): Predicting a lower than actual take-up rate might trigger excessive focus and investment in regions that are already performing well, thus diverting attention and resources from regions that genuinely require intervention and support.\
-
-### Tolerance Levels
-
-For a government project like PMJDY, which aims at broad financial inclusion, the tolerance for error should ideally be low to ensure that interventions are appropriately targeted. The RMSE should be minimized to a level where the predictions do not mislead policy decisions or lead to significant misallocations of resources.
-
-### What could be more costly? 
-
-Given that PMJDY's main goal is to ensure universal access to financial services, a false positive leading to under-provision of resources in areas still needing support poses a significant risk. It can directly counteract the mission of financial inclusivity, leaving vulnerable populations without essential financial services. This not only hampers individual economic opportunities but can also widen economic disparities.\
-\
 
 # Models
 
