@@ -27,7 +27,11 @@ library(expss)
 library(patchwork)
 ```
 
-# Set Up
+# Background and Literature Review
+
+# Data Sources 
+
+# Data Wrangling and Exploratory Data Analysis
 
 ### Preparing data
 
@@ -69,7 +73,9 @@ pmjdy = apply_labels(pmjdy,
 
 ```
 
-# Geospatial Analysis
+# Data Analysis
+
+## Geospatial Analysis
 
 ```{r geospatial}
 
@@ -83,10 +89,6 @@ india <- geoboundaries(
   adm_lvl = "adm1",
   type = "simplified"
   )
-
-# Displaying map of India
-ggplot(data = india) +
-  geom_sf()
 
 # Setting crs as the same from sf_pmjdy to ensure spatial join is done correctly 
 india <- st_transform(india, crs = st_crs(sf_pmjdy))
@@ -135,7 +137,7 @@ choro_edu + choro_emp + choro_income
 
 ```
 
-# Supervised Machine Learning Models 
+## Supervised Machine Learning Models 
 
 ### Set Up for Models and EDA through data visualization
 
@@ -200,7 +202,7 @@ eda3
 
 
 
-# Models
+## Models
 
 ```{r Recipe }
 
@@ -329,7 +331,7 @@ labs( title = "RMSE by model and by fold", color = "Model", x = "Fold", y = "Est
 
 ```
 
-# Estimation
+### Estimation
 
 ```{r Estimations }
 # Selecting best models, however from the calculation of the mean RMSE above, we know that lasso leads to the lowest root mean square error 
@@ -359,7 +361,7 @@ predictions %>%
   metrics(truth = pmjdy, estimate = .pred)
 ```
 
-# Interpretation
+### Interpretation
 
 This model has a high R squared with somewhat low RMSE compared to the other models. This means it can be an adequate model to predict the take up of the PMJDY program. We can see that the predictions are a few percentage points off, so although the prediction is approximately accurate, it is important to note that the predictions are not very precise.
 
@@ -368,3 +370,5 @@ For the context of this program, this model can be used to predict the take up o
 To make our models more efficient, we would make use od feature engineering techniques like data imputation that helps us deal with missing values and normalizing or standardizing numerical features to ensure they have a similar scale.
 
 Models that we can try next to improve upon our results are KNN and CART models. If there are clear clusters or patterns in the feature space that could be captured by the nearest neighbors, KNN may perform well. Decision trees like CART can capture non-linear relationships between features and the target variable, making them suitable for data sets with complex decision boundaries.
+
+# Discussion of the results 
