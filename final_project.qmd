@@ -47,12 +47,12 @@ pmjdy <- pmjdy %>%
     Latitude = case_when(
       Latitude == 18.9 ~ 19.8,
       Latitude == 17.5 ~ 15.9,
-      TRUE ~ Latitude  # Keeps original value if conditions are not met
+      TRUE ~ Latitude  
     ),
     Longitude = case_when(
-      Longitude == 72.8 ~ 75.7,  # Note: Your condition said 'if Latitude==72.8', assuming typo, corrected it to Longitude
+      Longitude == 72.8 ~ 75.7, 
       Longitude == 78.6 ~ 79.7,
-      TRUE ~ Longitude  # Keeps original value if conditions are not met
+      TRUE ~ Longitude  
     )
   )
 
