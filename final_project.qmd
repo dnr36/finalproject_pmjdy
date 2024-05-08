@@ -22,6 +22,7 @@ library(ranger)
 library(sf)
 library(rgeoboundaries)
 library(ggthemes)
+library(rlang)
 ```
 
 # Set Up
@@ -90,14 +91,14 @@ india_pmjdy <- st_join(india, sf_pmjdy)
 
 india_pmjdy %>%
     ggplot() +
-    geom_sf(aes(fill = educationindex), color = "darkorange3", size = 0.1) +
+    geom_sf(aes(fill = employment), color = "darkorange3", size = 0.1) +
     scale_fill_gradient(
         low = "white", 
         high = "darkgreen",
     ) +
     theme_void()
 
-# making a function to make choropleths 
+# Making a function to make choropleths 
 
 #' india_choropleth
 #'
@@ -113,18 +114,20 @@ india_choropleth <- function(indicator) {
   
   india_pmjdy %>%
     ggplot() +
-    geom_sf(aes(fill = indicator), color = "darkorange3", size = 0.1) +
+    geom_sf(aes(fill = !!sym(indicator)), color = "darkorange3", size = 0.1) +
     scale_fill_gradient(
         low = "white", 
         high = "darkgreen",
     ) +
-    labs(title = paste0(indicator, "accross India"),
+    labs(title = paste0(indicator, " across India"),
           fill = indicator) +
     theme_void()
    
 }
 
-india_choropleth(indicator = "employment")
+india_choropleth(indicator = "educationindex")
+
+
 
 ```
 
