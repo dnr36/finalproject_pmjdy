@@ -44,15 +44,15 @@ sf_pmjdy <- st_as_sf(pmjdy, coords = c("longitude", "latitude")) %>%
 #editing latitude and longitude data 
 pmjdy <- pmjdy %>%
   mutate(
-    Latitude = case_when(
-      Latitude == 18.9 ~ 19.8,
-      Latitude == 17.5 ~ 15.9,
-      TRUE ~ Latitude  # Keeps original value if conditions are not met
+    latitude = case_when(
+      latitude == 18.9 ~ 19.8,
+      latitude == 17.5 ~ 15.9,
+      TRUE ~ latitude  # Keeps original value if conditions are not met
     ),
-    Longitude = case_when(
-      Longitude == 72.8 ~ 75.7,  # Note: Your condition said 'if Latitude==72.8', assuming typo, corrected it to Longitude
-      Longitude == 78.6 ~ 79.7,
-      TRUE ~ Longitude  # Keeps original value if conditions are not met
+    longitude = case_when(
+      longitude == 72.8 ~ 75.7,  # Note: Your condition said 'if Latitude==72.8', assuming typo, corrected it to Longitude
+      longitude == 78.6 ~ 79.7,
+      TRUE ~ longitude  # Keeps original value if conditions are not met
     )
   )
 
@@ -96,6 +96,35 @@ india_pmjdy %>%
         high = "darkgreen",
     ) +
     theme_void()
+
+# making a function to make choropleths 
+
+#' india_choropleth
+#'
+#' @description This function takes the argument of "indicator" and creates a choropleth for India. This helps to visualize the differences of similarities among the different states over a common indicator. 
+#' @param indicator 
+#'
+#' @return A choropleth map of India with the selected indicator.
+#' @export
+#'
+#' @examples india_choropleth(employment)
+#' 
+india_choropleth <- function(indicator) {
+  
+  india_pmjdy %>%
+    ggplot() +
+    geom_sf(aes(fill = indicator), color = "darkorange3", size = 0.1) +
+    scale_fill_gradient(
+        low = "white", 
+        high = "darkgreen",
+    ) +
+    labs(title = paste0(indicator, "accross India"),
+          fill = indicator) +
+    theme_void()
+   
+}
+
+india_choropleth(indicator = "employment")
 
 ```
 
