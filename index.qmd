@@ -23,6 +23,8 @@ library(sf)
 library(rgeoboundaries)
 library(ggthemes)
 library(rlang)
+library(expss)
+library(patchwork)
 ```
 
 # Set Up
@@ -32,9 +34,10 @@ library(rlang)
 ```{r Prepping data }
 
 pmjdy <- read_dta("PMJDYmaster.dta") %>%
-  filter(!year == 2021) 
+  filter(!year == 2021) %>% # There is no pmjdy take up data for this year
+  select(!partyinpower_dummy) # Unnecessary variable
 
-#editing latitude and longitude data 
+# Editing latitude and longitude data due to Punjab, Chandigarh and Haryana having the same coordinates since they have the same capitals. 
 pmjdy <- pmjdy %>%
   mutate(
     Latitude = case_when(
@@ -52,30 +55,34 @@ pmjdy <- pmjdy %>%
 # Changing all variable names to lower case
 names(pmjdy) <- tolower(names(pmjdy))
 
-# Making a SF to conduct geospatial analysis 
-sf_pmjdy <- st_as_sf(pmjdy, coords = c("longitude", "latitude")) %>%
-  st_set_crs(4326)
+# editing variables so that they can be used later in the geospatial analysis titles 
+pmjdy = apply_labels(pmjdy, 
+                     pmjdy = "PMJDY Uptake",
+                     healthindex = "Health Index", 
+                     incomeindex = "Income Index",
+                     educationindex = "Education Index",
+                     partyinpower = "Party in Power",
+                     employment = "Employment",
+                     pop = "Population"
+                     )
 
 
 ```
 
 # Geospatial Analysis
 
-```{r}
+```{r geospatial}
+
+# Making a SF to conduct geo-spatial analysis 
+sf_pmjdy <- st_as_sf(pmjdy, coords = c("longitude", "latitude")) %>%
+  st_set_crs(4326)
+
 # Loading data for the map of India 
 india <- geoboundaries(
   country = "India",
   adm_lvl = "adm1",
   type = "simplified"
   )
-
-# Some of the names contain special characters not found in the main PMJDY data set 
-india <- india %>%
-  mutate(shapeName = case_when(
-    shapeName == "Mahārāshtra" ~ "Maharashtra", 
-    shapeName == "Nāgāland" ~ "Nagaland",
-    TRUE ~ shapeName
-  ))
 
 # Displaying map of India
 ggplot(data = india) +
@@ -87,18 +94,7 @@ india <- st_transform(india, crs = st_crs(sf_pmjdy))
 # Spatial join 
 india_pmjdy <- st_join(india, sf_pmjdy)
 
-# Creating a choropleth 
-
-india_pmjdy %>%
-    ggplot() +
-    geom_sf(aes(fill = employment), color = "darkorange3", size = 0.1) +
-    scale_fill_gradient(
-        low = "white", 
-        high = "darkgreen",
-    ) +
-    theme_void()
-
-# Making a function to make choropleths 
+# Making a function to make more choropleths 
 
 #' india_choropleth
 #'
@@ -114,18 +110,26 @@ india_choropleth <- function(indicator) {
   
   india_pmjdy %>%
     ggplot() +
-    geom_sf(aes(fill = !!sym(indicator)), color = "darkorange3", size = 0.1) +
+    geom_sf(aes(fill = !!sym(indicator)), color = "darkorange2", size = 0.1) +
     scale_fill_gradient(
         low = "white", 
         high = "darkgreen",
     ) +
-    labs(title = paste0(indicator, " across India"),
-          fill = indicator) +
+   labs(title = paste0(as.character(attr(india_pmjdy[[indicator]], "label")), " across India"), 
+      fill = attr(india_pmjdy[[indicator]], "label")) +
     theme_void()
    
 }
 
-india_choropleth(indicator = "educationindex")
+# Variables of interest for PMJDY takeup are education, employment and income: 
+choro_pmjdy <- india_choropleth(indicator = "pmjdy")
+choro_edu <- india_choropleth(indicator = "educationindex")
+choro_emp <- india_choropleth(indicator = "employment")
+choro_income <- india_choropleth(indicator = "incomeindex")
+
+choro_pmjdy
+
+choro_edu + choro_emp + choro_income 
 
 
 
