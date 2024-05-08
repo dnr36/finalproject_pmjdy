@@ -56,24 +56,6 @@ names(pmjdy) <- tolower(names(pmjdy))
 sf_pmjdy <- st_as_sf(pmjdy, coords = c("longitude", "latitude")) %>%
   st_set_crs(4326)
 
-<<<<<<< HEAD
-#editing latitude and longitude data 
-pmjdy <- pmjdy %>%
-  mutate(
-    latitude = case_when(
-      latitude == 18.9 ~ 19.8,
-      latitude == 17.5 ~ 15.9,
-      TRUE ~ latitude  # Keeps original value if conditions are not met
-    ),
-    longitude = case_when(
-      longitude == 72.8 ~ 75.7,  # Note: Your condition said 'if Latitude==72.8', assuming typo, corrected it to Longitude
-      longitude == 78.6 ~ 79.7,
-      TRUE ~ longitude  # Keeps original value if conditions are not met
-    )
-  )
-=======
-
->>>>>>> origin/main
 
 ```
 
