@@ -25,6 +25,15 @@ library(ggthemes)
 library(rlang)
 library(expss)
 library(patchwork)
+library(rsample)
+library(tidyclust)
+library(factoextra)
+library(broom)
+library(yardstick)
+library(vip)
+library(parsnip)
+library(recipes)
+library(themis)
 ```
 
 # Background and Literature Review
@@ -154,7 +163,7 @@ df_train <- training(x = pmjdy_split)
 df_test  <- testing(x = pmjdy_split)
 
 # Cross validation folds, tried to stratify by state but the data is too small 
-folds <- vfold_cv(df_train, v=10)
+folds <- vfold_cv(df_train, v = 10)
 
 
 delhi_data <- df_train[df_train$state == "Delhi", ]
@@ -233,13 +242,13 @@ dt_wf <- workflow() %>%
 dt_fit_rs <- dt_wf %>%
   fit_resamples(resamples = folds,
                 control = control_resamples(save_pred = TRUE),
-                metrics = metric_set(rmse, mae,rsq))
+                metrics = metric_set(rmse))
 
 # Decision tree metrics
 dt_metrics <- collect_metrics(dt_fit_rs, summarize = FALSE)
 
 
-# Caculating mean rsme
+# Calculating mean rsme
 tree_mean_rmse <- dt_metrics %>%
   filter(.metric == "rmse") %>%
   pull(.estimate) %>%
@@ -302,7 +311,9 @@ rf_wf <- workflow() %>%
 
 # Fitting model 
 rf_fit_rs <- rf_wf %>%
-    fit_resamples(resamples = folds)
+    fit_resamples(resamples = folds, 
+                  control = control_resamples(save_pred = TRUE),
+                metrics = metric_set(rmse))
 
 # Calculating metrics 
 rf_metrics <- rf_fit_rs %>%
@@ -355,6 +366,9 @@ predictions <-
 predictions %>%
   select(pmjdy, .pred) %>%
   print()
+
+# Removing label from the "truth" variable, pmjdy, so that the model can be evaluated
+predictions = unlab(predictions)
 
 # Evaluating model 
  predictions %>%
