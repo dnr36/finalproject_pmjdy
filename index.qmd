@@ -38,15 +38,166 @@ library(themis)
 
 # Background and Literature Review
 
-# Data Sources 
+# Data Sources
 
 # Data Wrangling and Exploratory Data Analysis
+
+```{r}
+
+# Summary Statistics
+# PMJDY 
+n_pmjdy <- length(pmjdy$pmjdy)
+print(n_pmjdy)
+
+mean_pmjdy <- mean(pmjdy$pmjdy, na.rm = TRUE)
+print(mean_pmjdy)
+
+sd_pmjdy <- sd(pmjdy$pmjdy, na.rm = TRUE)
+print(sd_pmjdy)
+
+min_pmjdy <- min(pmjdy$pmjdy, na.rm = TRUE)
+print(min_pmjdy)
+
+max_pmjdy <- max(pmjdy$pmjdy, na.rm = TRUE)
+print(max_pmjdy)
+
+# Inflation
+n_inflation <- length(pmjdy$inflation)
+print(n_inflation)
+
+mean_inflation <- mean(pmjdy$inflation, na.rm = TRUE)
+print(mean_inflation)
+
+sd_inflation <- sd(pmjdy$inflation, na.rm = TRUE)
+print(sd_pmjdy)
+
+min_inflation <- min(pmjdy$inflation, na.rm = TRUE)
+print(min_inflation)
+
+max_inflation <- max(pmjdy$inflation, na.rm = TRUE)
+print(max_inflation)
+
+# GDP 
+n_gdp <- length(pmjdy$gdp)
+print(n_gdp)
+
+mean_gdp <- mean(pmjdy$gdp, na.rm = TRUE)
+print(mean_gdp)
+
+sd_gdp <- sd(pmjdy$gdp, na.rm = TRUE)
+print(sd_gdp)
+
+min_gdp <- min(pmjdy$gdp, na.rm = TRUE)
+print(min_gdp)
+
+max_gdp <- max(pmjdy$gdp, na.rm = TRUE)
+print(max_gdp)
+
+# Health index
+n_healthindex <- length(pmjdy$healthindex)
+print(n_healthindex)
+
+mean_healthindex <- mean(pmjdy$healthindex, na.rm = TRUE)
+print(mean_healthindex)
+
+sd_healthindex <- sd(pmjdy$healthindex, na.rm = TRUE)
+print(sd_healthindex)
+
+min_healthindex <- min(pmjdy$healthindex, na.rm =TRUE)
+print(min_healthindex)
+
+max_healthindex <- max(pmjdy$healthindex, na.rm = TRUE)
+print(max_healthindex)
+
+# Income index 
+n_incomeindex <- length(pmjdy$incomeindex)
+print(n_incomeindex)
+
+mean_incomeindex <- mean(pmjdy$incomeindex, na.rm = TRUE)
+print(mean_incomeindex)
+
+sd_incomeindex <- sd(pmjdy$incomeindex, na.rm = TRUE)
+print(sd_incomeindex)
+
+min_incomeindex <- min(pmjdy$incomeindex, na.rm =TRUE)
+print(min_incomeindex)
+
+max_incomeindex <- max(pmjdy$incomeindex, na.rm = TRUE)
+print(max_incomeindex)
+
+# Education index 
+n_educationindex <- length(pmjdy$educationindex)
+print(n_educationindex)
+
+mean_eduationindex <- mean(pmjdy$educationindex, na.rm = TRUE)
+print(mean_eduationindex)
+
+sd_educationindex <- sd(pmjdy$educationindex, na.rm = TRUE)
+print(sd_educationindex)
+
+min_educationindex <- min(pmjdy$educationindex, na.rm =TRUE)
+print(min_educationindex)
+
+max_educationindex <- max(pmjdy$educationindex, na.rm = TRUE)
+print(max_educationindex)
+
+# Employment
+n_employment <- length(pmjdy$employment)
+print(n_employment)
+
+mean_employment <- mean(pmjdy$employment, na.rm = TRUE)
+print(mean_employment)
+
+sd_employment <- sd(pmjdy$employment, na.rm = TRUE)
+print(sd_employment)
+
+min_employment <- min(pmjdy$employment, na.rm =TRUE)
+print(min_employment)
+
+max_employment <- max(pmjdy$employment, na.rm = TRUE)
+print(max_employment)
+
+# Creating a table
+column1 <- c("PMJDY", "Inflation", "GDP", "Health Index", "Income Index", "Education Index", "Employment")
+column2 <- c(n_pmjdy, n_inflation, n_gdp, n_healthindex, n_incomeindex, n_educationindex, n_employment)
+column3 <- c(mean_pmjdy, mean_inflation, mean_gdp, mean_healthindex, mean_incomeindex, mean_eduationindex, mean_employment)
+column4 <- c(sd_pmjdy, sd_inflation, sd_gdp, sd_healthindex, sd_incomeindex, sd_educationindex, sd_employment)
+column5 <- c(min_pmjdy, min_inflation, min_gdp, min_healthindex, min_incomeindex, min_educationindex, min_employment)
+column6 <- c(max_pmjdy, max_inflation, max_gdp, max_healthindex, max_incomeindex, max_educationindex, max_employment)
+
+column_names <- c("Variable", "Observations", "Mean", "Std. Dev.", "Min", "Max")
+
+pmjdy_summarystats <- data.frame(Column1 = column1,
+                                 Column2 = column2,
+                                 Column3 = column3,
+                                 Column4 = column4,
+                                 Column5 = column5,
+                                 Column6 = column6)
+
+colnames(pmjdy_summarystats) <- column_names
+
+print(pmjdy_summarystats)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+```
 
 ### Preparing data
 
 ```{r Prepping data }
 
-pmjdy <- read_dta("PMJDYmaster.dta") %>%
+pmjdy <- read_dta("PMJDYmaster.dta")%>% 
   filter(!year == 2021) %>% # There is no pmjdy take up data for this year
   select(!partyinpower_dummy) # Unnecessary variable
 
@@ -146,7 +297,7 @@ choro_edu + choro_emp + choro_income
 
 ```
 
-## Supervised Machine Learning Models 
+## Supervised Machine Learning Models
 
 ### Set Up for Models and EDA through data visualization
 
@@ -208,8 +359,6 @@ eda2
 eda3
 
 ```
-
-
 
 ## Models
 
@@ -385,4 +534,4 @@ To make our models more efficient, we would make use od feature engineering tech
 
 Models that we can try next to improve upon our results are KNN and CART models. If there are clear clusters or patterns in the feature space that could be captured by the nearest neighbors, KNN may perform well. Decision trees like CART can capture non-linear relationships between features and the target variable, making them suitable for data sets with complex decision boundaries.
 
-# Discussion of the results 
+# Discussion of the results
