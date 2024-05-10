@@ -36,7 +36,31 @@ library(recipes)
 library(themis)
 ```
 
-# Background and Literature Review
+# Background 
+
+According to the G20 report published by Global Partnership in 2023, India had set a target of achieving 80 percent financial inclusion (i.e., 80 percent of its population has access to financial services), which the nation achieved at the country level in 6 years (41 years ahead of the target). To achieve this target, India launched numerous financial inclusion programs at the national level. PMJDY was launched nationwide in 2014 in India. Administered by the Ministry of Finance, this policy seeks to increase financial inclusion among lower income groups of the Indian society. In doing so, the policy offers an array of financial services, including savings accounts, debit cards, pension, accident and life insurance, access to credit, and programs aiming to increase financial literacy to individuals. Eligible individuals include Indian citizens above 10 years of age. \
+\
+\
+***PMJDY Services***\
+\
+
+Financial services other than a savings account are administered through interaction and coordination with other schemes. Access to credit under PMJDY is facilitated through an overdraft facility, which becomes available to account holders after six months of satisfactory operation of their accounts. This facility aims to provide a financial safety net and promote small-scale entrepreneurship. For pension services, PMJDY links with schemes like the Pradhan Mantri Shram Yogi Maan-Dhan (PMSYM) and the National Pension Scheme (NPS), catering primarily to the unorganized sector. These schemes allow individuals to voluntarily contribute to a pension account during their working life, ensuring financial stability in old age. PMJDY accounts also serve as conduits for beneficiaries to enroll in other government programs, such as accident and life insurance under Pradhan Mantri Suraksha Bima Yojana (PMSBY) and Pradhan Mantri Jeevan Jyoti Bima Yojana (PMJJBY), respectively.
+
+# Literature Review
+
+Literature suggests that PMJDY is likely to be associated with an increase in financial inclusion (Naik et al., 2018; Gupta 2023; Senapati 2018). However, despite this progress, some marginalized groups (e.g., women, lower income groups, lesser educated population) of the population remain underbanked or underserved by the banking sector (Ravi et al., 2019; Barik et al., 2019). 
+
+***Program Participation***
+
+As of the program's nine-year mark (2023), PMJDY included over 500 million people in the formal banking system (Jayaswal, 2023). Notably, about 67 percent of these accounts were opened in rural and semi-urban areas. Additionally, around 340 million debit cards have been issued, and 2 lakh Indian Rupee (INR) (approximately \$2400 USD) in accident insurance coverage have provided an added layer of financial security. 
+
+The participation rate of PMJDY, as found by our analysis, reveals an increase from an average of 18.8 percent in 2016 to 26.2 percent in 2020. This means that on average, 18.8 percent of the population in each state was participating in the policy as compared to 26.2 percent in 2020, a 7.4 percentage point increase. 
+
+***Challenges Faced by PMJDY*** 
+
+PMJDY, like many social programs, has faced some implementation challenges. One of the primary challenges is managing duplicate and dormant accounts, which can skew estimates of the program's effectiveness and resource allocation. This issue is closely tied to the need for enhancing financial literacy among the beneficiaries, ensuring they understand and utilize the financial services offered effectively (Malik et al., 2023).
+
+While that challenge is valid across geographies, a challenge particularly acute for rural areas is internet connectivity. Inadequate networking and bandwidth issues present hindrances in administering the program smoothly, especially in rural areas. These issues are particularly challenging in areas where banking infrastructure is already limited. The scarcity of ATMs in rural areas is one such barrier. Many beneficiaries are not accustomed to or lack easy access to ATMs and find it challenging to utilize these services effectively. In addition, a notable gender disparity exists within the banking sector, suggesting that women may not be reaping the benefits of the scheme as much as men. This gender gap points to a need for more inclusive financial services.\
 
 # Data Sources
 
@@ -62,35 +86,35 @@ max_pmjdy <- max(pmjdy$pmjdy, na.rm = TRUE)
 print(max_pmjdy)
 
 # Inflation
-n_inflation <- length(pmjdy$inflation)
+n_inflation <- length(pmjdy$Inflation)
 print(n_inflation)
 
-mean_inflation <- mean(pmjdy$inflation, na.rm = TRUE)
+mean_inflation <- mean(pmjdy$Inflation, na.rm = TRUE)
 print(mean_inflation)
 
-sd_inflation <- sd(pmjdy$inflation, na.rm = TRUE)
+sd_inflation <- sd(pmjdy$Inflation, na.rm = TRUE)
 print(sd_pmjdy)
 
-min_inflation <- min(pmjdy$inflation, na.rm = TRUE)
+min_inflation <- min(pmjdy$Inflation, na.rm = TRUE)
 print(min_inflation)
 
-max_inflation <- max(pmjdy$inflation, na.rm = TRUE)
+max_inflation <- max(pmjdy$Inflation, na.rm = TRUE)
 print(max_inflation)
 
 # GDP 
-n_gdp <- length(pmjdy$gdp)
+n_gdp <- length(pmjdy$GDP)
 print(n_gdp)
 
-mean_gdp <- mean(pmjdy$gdp, na.rm = TRUE)
+mean_gdp <- mean(pmjdy$GDP, na.rm = TRUE)
 print(mean_gdp)
 
-sd_gdp <- sd(pmjdy$gdp, na.rm = TRUE)
+sd_gdp <- sd(pmjdy$GDP, na.rm = TRUE)
 print(sd_gdp)
 
-min_gdp <- min(pmjdy$gdp, na.rm = TRUE)
+min_gdp <- min(pmjdy$GDP, na.rm = TRUE)
 print(min_gdp)
 
-max_gdp <- max(pmjdy$gdp, na.rm = TRUE)
+max_gdp <- max(pmjdy$GDP, na.rm = TRUE)
 print(max_gdp)
 
 # Health index
@@ -110,19 +134,19 @@ max_healthindex <- max(pmjdy$healthindex, na.rm = TRUE)
 print(max_healthindex)
 
 # Income index 
-n_incomeindex <- length(pmjdy$incomeindex)
+n_incomeindex <- length(pmjdy$Incomeindex)
 print(n_incomeindex)
 
-mean_incomeindex <- mean(pmjdy$incomeindex, na.rm = TRUE)
+mean_incomeindex <- mean(pmjdy$Incomeindex, na.rm = TRUE)
 print(mean_incomeindex)
 
-sd_incomeindex <- sd(pmjdy$incomeindex, na.rm = TRUE)
+sd_incomeindex <- sd(pmjdy$Incomeindex, na.rm = TRUE)
 print(sd_incomeindex)
 
-min_incomeindex <- min(pmjdy$incomeindex, na.rm =TRUE)
+min_incomeindex <- min(pmjdy$Incomeindex, na.rm =TRUE)
 print(min_incomeindex)
 
-max_incomeindex <- max(pmjdy$incomeindex, na.rm = TRUE)
+max_incomeindex <- max(pmjdy$Incomeindex, na.rm = TRUE)
 print(max_incomeindex)
 
 # Education index 
@@ -193,7 +217,32 @@ print(pmjdy_summarystats)
 
 ```
 
-### Preparing data
+## Interpretation 
+
+Based on the summary statistics we have generated, we can draw many insights. Some of the findings are: \
+
+-   **Average Take-up Rate (PMJDY):** The mean of 22.86 suggests a moderate level of bank account uptake under this scheme, with the minimum at 8.994 and the maximum at over 31, indicating significant variation among different states or over different years.
+
+-   **Inflation:\
+    \
+    ** The mean inflation rate across the dataset is 4.77, with a standard deviation of around 2.02, pointing to varying economic conditions across the states. The minimum inflation rate is quite low at 0.5, suggesting a period or state with very stable prices, while the maximum is higher at around 7.6.
+
+-   **GDP:**
+
+    With a mean GDP of approximately 1.37e+05 and a broad range from 22201 to over 3.26e+05, this indicates a substantial disparity in the economic size and output among the states. The high standard deviation reflects this significant variation.
+
+-   **Health, Income, and Education Indices:**
+
+    The health, income, and education indices have means around 0.8, 0.65, and 0.59 respectively. All these indices exhibit relatively low variability (standard deviations around 0.06-0.07), suggesting somewhat uniform conditions across the dataset in terms of health access, income levels, and educational attainment. However, the ranges indicate some outliers or significant differences in some areas.
+
+-   **Employment:**
+
+    The employment rate has a mean of around 49, with a very high standard deviation of about 7.91, showing that employment rates vary widely across states. The range from 27.5 to 73 highlights some regions with relatively low employment rates and others with very high employment.\
+    \
+    These statistics provide the context in which the PMJDY scheme is being implemented. The variations in economic conditions, inflation, and human development indices suggest differing regional challenges and potentials for financial inclusion. The analysis of these variables can provide deeper insights into how regional disparities might be influencing the uptake of the PMJDY scheme, aiming to enhance financial inclusivity across various socio-economic backgrounds.\
+    \
+    \
+    Preparing data
 
 ```{r Prepping data }
 
