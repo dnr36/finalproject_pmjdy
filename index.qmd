@@ -66,120 +66,124 @@ While that challenge is valid across geographies, a challenge particularly acute
 
 # Data Wrangling and Exploratory Data Analysis
 
+```{r Prepping data }
+
+pmjdy <- read_dta("PMJDYmaster.dta")%>% 
+  filter(!year == 2021) %>% # There is no pmjdy take up data for this year
+  select(!partyinpower_dummy) # Unnecessary variable
+
+# Editing latitude and longitude data due to Punjab, Chandigarh and Haryana having the same coordinates since they have the same capitals. 
+pmjdy <- pmjdy %>%
+  mutate(
+    Latitude = case_when(
+      Latitude == 18.9 ~ 19.8,
+      Latitude == 17.5 ~ 15.9,
+      TRUE ~ Latitude  
+    ),
+    Longitude = case_when(
+      Longitude == 72.8 ~ 75.7, 
+      Longitude == 78.6 ~ 79.7,
+      TRUE ~ Longitude  
+    )
+  )
+
+# Changing all variable names to lower case
+names(pmjdy) <- tolower(names(pmjdy))
+
+# Editing variables so that they can be used later in the geospatial analysis titles 
+pmjdy = apply_labels(pmjdy, 
+                     pmjdy = "PMJDY Uptake",
+                     healthindex = "Health Index", 
+                     incomeindex = "Income Index",
+                     educationindex = "Education Index",
+                     partyinpower = "Party in Power",
+                     employment = "Employment",
+                     pop = "Population"
+                     )
+
+
+```
+
 ```{r}
 
 # Summary Statistics
+
 # PMJDY 
 n_pmjdy <- length(pmjdy$pmjdy)
-print(n_pmjdy)
 
 mean_pmjdy <- mean(pmjdy$pmjdy, na.rm = TRUE)
-print(mean_pmjdy)
 
 sd_pmjdy <- sd(pmjdy$pmjdy, na.rm = TRUE)
-print(sd_pmjdy)
 
 min_pmjdy <- min(pmjdy$pmjdy, na.rm = TRUE)
-print(min_pmjdy)
 
 max_pmjdy <- max(pmjdy$pmjdy, na.rm = TRUE)
-print(max_pmjdy)
 
 # Inflation
 n_inflation <- length(pmjdy$Inflation)
-print(n_inflation)
 
 mean_inflation <- mean(pmjdy$Inflation, na.rm = TRUE)
-print(mean_inflation)
 
 sd_inflation <- sd(pmjdy$Inflation, na.rm = TRUE)
-print(sd_pmjdy)
 
 min_inflation <- min(pmjdy$Inflation, na.rm = TRUE)
-print(min_inflation)
 
 max_inflation <- max(pmjdy$Inflation, na.rm = TRUE)
-print(max_inflation)
 
 # GDP 
 n_gdp <- length(pmjdy$GDP)
-print(n_gdp)
 
 mean_gdp <- mean(pmjdy$GDP, na.rm = TRUE)
-print(mean_gdp)
 
 sd_gdp <- sd(pmjdy$GDP, na.rm = TRUE)
-print(sd_gdp)
 
 min_gdp <- min(pmjdy$GDP, na.rm = TRUE)
-print(min_gdp)
 
 max_gdp <- max(pmjdy$GDP, na.rm = TRUE)
-print(max_gdp)
 
 # Health index
 n_healthindex <- length(pmjdy$healthindex)
-print(n_healthindex)
 
 mean_healthindex <- mean(pmjdy$healthindex, na.rm = TRUE)
-print(mean_healthindex)
 
 sd_healthindex <- sd(pmjdy$healthindex, na.rm = TRUE)
-print(sd_healthindex)
 
 min_healthindex <- min(pmjdy$healthindex, na.rm =TRUE)
-print(min_healthindex)
 
 max_healthindex <- max(pmjdy$healthindex, na.rm = TRUE)
-print(max_healthindex)
 
 # Income index 
 n_incomeindex <- length(pmjdy$Incomeindex)
-print(n_incomeindex)
 
 mean_incomeindex <- mean(pmjdy$Incomeindex, na.rm = TRUE)
-print(mean_incomeindex)
 
 sd_incomeindex <- sd(pmjdy$Incomeindex, na.rm = TRUE)
-print(sd_incomeindex)
 
 min_incomeindex <- min(pmjdy$Incomeindex, na.rm =TRUE)
-print(min_incomeindex)
 
 max_incomeindex <- max(pmjdy$Incomeindex, na.rm = TRUE)
-print(max_incomeindex)
 
 # Education index 
 n_educationindex <- length(pmjdy$educationindex)
-print(n_educationindex)
 
 mean_eduationindex <- mean(pmjdy$educationindex, na.rm = TRUE)
-print(mean_eduationindex)
 
 sd_educationindex <- sd(pmjdy$educationindex, na.rm = TRUE)
-print(sd_educationindex)
 
 min_educationindex <- min(pmjdy$educationindex, na.rm =TRUE)
-print(min_educationindex)
 
 max_educationindex <- max(pmjdy$educationindex, na.rm = TRUE)
-print(max_educationindex)
 
 # Employment
 n_employment <- length(pmjdy$employment)
-print(n_employment)
 
 mean_employment <- mean(pmjdy$employment, na.rm = TRUE)
-print(mean_employment)
 
 sd_employment <- sd(pmjdy$employment, na.rm = TRUE)
-print(sd_employment)
 
 min_employment <- min(pmjdy$employment, na.rm =TRUE)
-print(min_employment)
 
 max_employment <- max(pmjdy$employment, na.rm = TRUE)
-print(max_employment)
 
 # Creating a table
 column1 <- c("PMJDY", "Inflation", "GDP", "Health Index", "Income Index", "Education Index", "Employment")
@@ -201,18 +205,6 @@ pmjdy_summarystats <- data.frame(Column1 = column1,
 colnames(pmjdy_summarystats) <- column_names
 
 print(pmjdy_summarystats)
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 ```
@@ -242,45 +234,8 @@ Based on the summary statistics we have generated, we can draw many insights. So
     These statistics provide the context in which the PMJDY scheme is being implemented. The variations in economic conditions, inflation, and human development indices suggest differing regional challenges and potentials for financial inclusion. The analysis of these variables can provide deeper insights into how regional disparities might be influencing the uptake of the PMJDY scheme, aiming to enhance financial inclusivity across various socio-economic backgrounds.\
     \
     \
-    Preparing data
+  
 
-```{r Prepping data }
-
-pmjdy <- read_dta("PMJDYmaster.dta")%>% 
-  filter(!year == 2021) %>% # There is no pmjdy take up data for this year
-  select(!partyinpower_dummy) # Unnecessary variable
-
-# Editing latitude and longitude data due to Punjab, Chandigarh and Haryana having the same coordinates since they have the same capitals. 
-pmjdy <- pmjdy %>%
-  mutate(
-    Latitude = case_when(
-      Latitude == 18.9 ~ 19.8,
-      Latitude == 17.5 ~ 15.9,
-      TRUE ~ Latitude  
-    ),
-    Longitude = case_when(
-      Longitude == 72.8 ~ 75.7, 
-      Longitude == 78.6 ~ 79.7,
-      TRUE ~ Longitude  
-    )
-  )
-
-# Changing all variable names to lower case
-names(pmjdy) <- tolower(names(pmjdy))
-
-# editing variables so that they can be used later in the geospatial analysis titles 
-pmjdy = apply_labels(pmjdy, 
-                     pmjdy = "PMJDY Uptake",
-                     healthindex = "Health Index", 
-                     incomeindex = "Income Index",
-                     educationindex = "Education Index",
-                     partyinpower = "Party in Power",
-                     employment = "Employment",
-                     pop = "Population"
-                     )
-
-
-```
 
 # Data Analysis
 
@@ -328,7 +283,11 @@ india_choropleth <- function(indicator) {
     ) +
    labs(title = paste0(as.character(attr(india_pmjdy[[indicator]], "label")), " across India"), 
       fill = attr(india_pmjdy[[indicator]], "label")) +
-    theme_void()
+    theme_void() +
+    theme(
+      plot.title = element_text(size = 12),
+       legend.title = element_text(size = 10) 
+    )
    
 }
 
