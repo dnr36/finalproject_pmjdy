@@ -9,7 +9,38 @@ format:
     embed-resources: true
 ---
 
-# Loading Libraries
+# 1. Backgrounf and Literature Review
+
+## Background 
+
+According to the G20 report published by Global Partnership in 2023, India had set a target of achieving 80 percent financial inclusion (i.e., 80 percent of its population has access to financial services), which the nation achieved at the country level in 6 years (41 years ahead of the target). To achieve this target, India launched numerous financial inclusion programs at the national level. PMJDY was launched nationwide in 2014 in India. Administered by the Ministry of Finance, this policy seeks to increase financial inclusion among lower income groups of the Indian society. In doing so, the policy offers an array of financial services, including savings accounts, debit cards, pension, accident and life insurance, access to credit, and programs aiming to increase financial literacy to individuals. Eligible individuals include Indian citizens above 10 years of age. \
+\
+\
+***PMJDY Services***\
+\
+
+Financial services other than a savings account are administered through interaction and coordination with other schemes. Access to credit under PMJDY is facilitated through an overdraft facility, which becomes available to account holders after six months of satisfactory operation of their accounts. This facility aims to provide a financial safety net and promote small-scale entrepreneurship. For pension services, PMJDY links with schemes like the Pradhan Mantri Shram Yogi Maan-Dhan (PMSYM) and the National Pension Scheme (NPS), catering primarily to the unorganized sector. These schemes allow individuals to voluntarily contribute to a pension account during their working life, ensuring financial stability in old age. PMJDY accounts also serve as conduits for beneficiaries to enroll in other government programs, such as accident and life insurance under Pradhan Mantri Suraksha Bima Yojana (PMSBY) and Pradhan Mantri Jeevan Jyoti Bima Yojana (PMJJBY), respectively.
+
+## Literature Review
+
+Literature suggests that PMJDY is likely to be associated with an increase in financial inclusion (Naik et al., 2018; Gupta 2023; Senapati 2018). However, despite this progress, some marginalized groups (e.g., women, lower income groups, lesser educated population) of the population remain underbanked or underserved by the banking sector (Ravi et al., 2019; Barik et al., 2019). 
+
+***Program Participation***
+
+As of the program's nine-year mark (2023), PMJDY included over 500 million people in the formal banking system (Jayaswal, 2023). Notably, about 67 percent of these accounts were opened in rural and semi-urban areas. Additionally, around 340 million debit cards have been issued, and 2 lakh Indian Rupee (INR) (approximately \$2400 USD) in accident insurance coverage have provided an added layer of financial security. 
+
+The participation rate of PMJDY, as found by our analysis, reveals an increase from an average of 18.8 percent in 2016 to 26.2 percent in 2020. This means that on average, 18.8 percent of the population in each state was participating in the policy as compared to 26.2 percent in 2020, a 7.4 percentage point increase. 
+
+***Challenges Faced by PMJDY*** 
+
+PMJDY, like many social programs, has faced some implementation challenges. One of the primary challenges is managing duplicate and dormant accounts, which can skew estimates of the program's effectiveness and resource allocation. This issue is closely tied to the need for enhancing financial literacy among the beneficiaries, ensuring they understand and utilize the financial services offered effectively (Malik et al., 2023).
+
+While that challenge is valid across geographies, a challenge particularly acute for rural areas is internet connectivity. Inadequate networking and bandwidth issues present hindrances in administering the program smoothly, especially in rural areas. These issues are particularly challenging in areas where banking infrastructure is already limited. The scarcity of ATMs in rural areas is one such barrier. Many beneficiaries are not accustomed to or lack easy access to ATMs and find it challenging to utilize these services effectively. In addition, a notable gender disparity exists within the banking sector, suggesting that women may not be reaping the benefits of the scheme as much as men. This gender gap points to a need for more inclusive financial services.\
+
+# 2. Data Sources
+
+# 3. Data Wrangling and Exploratory Data Analysis
+### Loading Libraries
 
 ```{r Libraries }
 library(tidyverse)
@@ -35,36 +66,6 @@ library(parsnip)
 library(recipes)
 library(themis)
 ```
-
-# Background 
-
-According to the G20 report published by Global Partnership in 2023, India had set a target of achieving 80 percent financial inclusion (i.e., 80 percent of its population has access to financial services), which the nation achieved at the country level in 6 years (41 years ahead of the target). To achieve this target, India launched numerous financial inclusion programs at the national level. PMJDY was launched nationwide in 2014 in India. Administered by the Ministry of Finance, this policy seeks to increase financial inclusion among lower income groups of the Indian society. In doing so, the policy offers an array of financial services, including savings accounts, debit cards, pension, accident and life insurance, access to credit, and programs aiming to increase financial literacy to individuals. Eligible individuals include Indian citizens above 10 years of age. \
-\
-\
-***PMJDY Services***\
-\
-
-Financial services other than a savings account are administered through interaction and coordination with other schemes. Access to credit under PMJDY is facilitated through an overdraft facility, which becomes available to account holders after six months of satisfactory operation of their accounts. This facility aims to provide a financial safety net and promote small-scale entrepreneurship. For pension services, PMJDY links with schemes like the Pradhan Mantri Shram Yogi Maan-Dhan (PMSYM) and the National Pension Scheme (NPS), catering primarily to the unorganized sector. These schemes allow individuals to voluntarily contribute to a pension account during their working life, ensuring financial stability in old age. PMJDY accounts also serve as conduits for beneficiaries to enroll in other government programs, such as accident and life insurance under Pradhan Mantri Suraksha Bima Yojana (PMSBY) and Pradhan Mantri Jeevan Jyoti Bima Yojana (PMJJBY), respectively.
-
-# Literature Review
-
-Literature suggests that PMJDY is likely to be associated with an increase in financial inclusion (Naik et al., 2018; Gupta 2023; Senapati 2018). However, despite this progress, some marginalized groups (e.g., women, lower income groups, lesser educated population) of the population remain underbanked or underserved by the banking sector (Ravi et al., 2019; Barik et al., 2019). 
-
-***Program Participation***
-
-As of the program's nine-year mark (2023), PMJDY included over 500 million people in the formal banking system (Jayaswal, 2023). Notably, about 67 percent of these accounts were opened in rural and semi-urban areas. Additionally, around 340 million debit cards have been issued, and 2 lakh Indian Rupee (INR) (approximately \$2400 USD) in accident insurance coverage have provided an added layer of financial security. 
-
-The participation rate of PMJDY, as found by our analysis, reveals an increase from an average of 18.8 percent in 2016 to 26.2 percent in 2020. This means that on average, 18.8 percent of the population in each state was participating in the policy as compared to 26.2 percent in 2020, a 7.4 percentage point increase. 
-
-***Challenges Faced by PMJDY*** 
-
-PMJDY, like many social programs, has faced some implementation challenges. One of the primary challenges is managing duplicate and dormant accounts, which can skew estimates of the program's effectiveness and resource allocation. This issue is closely tied to the need for enhancing financial literacy among the beneficiaries, ensuring they understand and utilize the financial services offered effectively (Malik et al., 2023).
-
-While that challenge is valid across geographies, a challenge particularly acute for rural areas is internet connectivity. Inadequate networking and bandwidth issues present hindrances in administering the program smoothly, especially in rural areas. These issues are particularly challenging in areas where banking infrastructure is already limited. The scarcity of ATMs in rural areas is one such barrier. Many beneficiaries are not accustomed to or lack easy access to ATMs and find it challenging to utilize these services effectively. In addition, a notable gender disparity exists within the banking sector, suggesting that women may not be reaping the benefits of the scheme as much as men. This gender gap points to a need for more inclusive financial services.\
-
-# Data Sources
-
-# Data Wrangling and Exploratory Data Analysis
 
 ```{r Prepping data }
 
@@ -237,7 +238,7 @@ Based on the summary statistics we have generated, we can draw many insights. So
   
 
 
-# Data Analysis
+# 4. Data Analysis
 
 ## Geospatial Analysis
 
@@ -304,6 +305,10 @@ choro_edu + choro_emp + choro_income
 
 
 ```
+This geospatial analysis of the state level characteristics helps visualize the correlation between different indicators and the PMJDY take up rate. The first choropleth shows the take-up rates across India and we can see that the highest rates are found in the north east part of the country, in states such as Assam and Chhattisgarh. 
+
+Upon further exploration we see that the areas with the highest PMJDY take up are also those with lower educational index, employment rates and income. This correlation suggests that the program was able to successfully target its intended population. A limitation for this finding is that it merely represents a correlation and not a causal link. Further analysis on the data will be conducted to create a model that optimizes accuracy to predict the take up rate based on the indicators explored through this geospatial analysis. 
+
 
 ## Supervised Machine Learning Models
 
@@ -532,14 +537,8 @@ predictions = unlab(predictions)
   metrics(truth = pmjdy, estimate = .pred)
 ```
 
-### Interpretation
+The best machine learning model among the three different options tried was LASSO. This model used hyper parameter tuning to select the best combination and strength of the indicators. The best LASSO model created above has a high R squared with somewhat low RMSE compared to the other models. This means it can be an adequate model to predict the take up of the PMJDY program. We can see that the predictions are a few percentage points off, so although the prediction is approximately accurate, it is important to note that the predictions are not very precise.
 
-This model has a high R squared with somewhat low RMSE compared to the other models. This means it can be an adequate model to predict the take up of the PMJDY program. We can see that the predictions are a few percentage points off, so although the prediction is approximately accurate, it is important to note that the predictions are not very precise.
+For the context of this program, this model can be used to predict the take up of the program in a certain place. The model would be a helpful tool because it can approximately predict if there will be a high enough take up rate that will make the investment/government expenditure worth it. 
 
-For the context of this program, this model can be used to predict the take up of the program in a certain place. The model would be a helpful tool because it can approximately predict if there will be a high enough take up rate that will make the investment/government expenditure worth it.\
-\
-To make our models more efficient, we would make use od feature engineering techniques like data imputation that helps us deal with missing values and normalizing or standardizing numerical features to ensure they have a similar scale.
-
-Models that we can try next to improve upon our results are KNN and CART models. If there are clear clusters or patterns in the feature space that could be captured by the nearest neighbors, KNN may perform well. Decision trees like CART can capture non-linear relationships between features and the target variable, making them suitable for data sets with complex decision boundaries.
-
-# Discussion of the results
+# 5. Discussion of the results
