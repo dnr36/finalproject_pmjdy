@@ -9,11 +9,11 @@ format:
     embed-resources: true
 ---
 
-# 1. Backgrounf and Literature Review
+# 1. Background and Literature Review
 
-## Background 
+## Background
 
-According to the G20 report published by Global Partnership in 2023, India had set a target of achieving 80 percent financial inclusion (i.e., 80 percent of its population has access to financial services), which the nation achieved at the country level in 6 years (41 years ahead of the target). To achieve this target, India launched numerous financial inclusion programs at the national level. PMJDY was launched nationwide in 2014 in India. Administered by the Ministry of Finance, this policy seeks to increase financial inclusion among lower income groups of the Indian society. In doing so, the policy offers an array of financial services, including savings accounts, debit cards, pension, accident and life insurance, access to credit, and programs aiming to increase financial literacy to individuals. Eligible individuals include Indian citizens above 10 years of age. \
+According to the G20 report published by Global Partnership in 2023, India had set a target of achieving 80 percent financial inclusion (i.e., 80 percent of its population has access to financial services), which the nation achieved at the country level in 6 years (41 years ahead of the target). To achieve this target, India launched numerous financial inclusion programs at the national level. PMJDY was launched nationwide in 2014 in India. Administered by the Ministry of Finance, this policy seeks to increase financial undefinedinclusion among lower income groups of the Indian society. In doing so, the policy offers an array of financial services, including savings accounts, debit cards, pension, accident and life insurance, access to credit, and programs aiming to increase financial literacy to individuals. Eligible individuals include Indian citizens above 10 years of age. \
 \
 \
 ***PMJDY Services***\
@@ -40,6 +40,7 @@ While that challenge is valid across geographies, a challenge particularly acute
 # 2. Data Sources
 
 # 3. Data Wrangling and Exploratory Data Analysis
+
 ### Loading Libraries
 
 ```{r Libraries }
@@ -210,9 +211,9 @@ print(pmjdy_summarystats)
 
 ```
 
-## Interpretation 
+## Interpretation
 
-Based on the summary statistics we have generated, we can draw many insights. Some of the findings are: \
+Based on the summary statistics we have generated, we can draw many insights. Some of the findings are:\
 
 -   **Average Take-up Rate (PMJDY):** The mean of 22.86 suggests a moderate level of bank account uptake under this scheme, with the minimum at 8.994 and the maximum at over 31, indicating significant variation among different states or over different years.
 
@@ -235,8 +236,6 @@ Based on the summary statistics we have generated, we can draw many insights. So
     These statistics provide the context in which the PMJDY scheme is being implemented. The variations in economic conditions, inflation, and human development indices suggest differing regional challenges and potentials for financial inclusion. The analysis of these variables can provide deeper insights into how regional disparities might be influencing the uptake of the PMJDY scheme, aiming to enhance financial inclusivity across various socio-economic backgrounds.\
     \
     \
-  
-
 
 # 4. Data Analysis
 
@@ -305,10 +304,10 @@ choro_edu + choro_emp + choro_income
 
 
 ```
-This geospatial analysis of the state level characteristics helps visualize the correlation between different indicators and the PMJDY take up rate. The first choropleth shows the take-up rates across India and we can see that the highest rates are found in the north east part of the country, in states such as Assam and Chhattisgarh. 
 
-Upon further exploration we see that the areas with the highest PMJDY take up are also those with lower educational index, employment rates and income. This correlation suggests that the program was able to successfully target its intended population. A limitation for this finding is that it merely represents a correlation and not a causal link. Further analysis on the data will be conducted to create a model that optimizes accuracy to predict the take up rate based on the indicators explored through this geospatial analysis. 
+This geospatial analysis of the state level characteristics helps visualize the correlation between different indicators and the PMJDY take up rate. The first choropleth shows the take-up rates across India and we can see that the highest rates are found in the north east part of the country, in states such as Assam and Chhattisgarh.
 
+Upon further exploration we see that the areas with the highest PMJDY take up are also those with lower educational index, employment rates and income. This correlation suggests that the program was able to successfully target its intended population. A limitation for this finding is that it merely represents a correlation and not a causal link. Further analysis on the data will be conducted to create a model that optimizes accuracy to predict the take up rate based on the indicators explored through this geospatial analysis.
 
 ## Supervised Machine Learning Models
 
@@ -372,6 +371,12 @@ eda2
 eda3
 
 ```
+
+The graph titled "Employment vs Literacy in Delhi" shows a scatter plot of employment rates plotted against literacy rates in Delhi, with a trend line indicating a positive correlation between the two variables. The data points suggest that as literacy rates increase, employment rates also tend to increase, though the relationship is not very strong given the narrow range of literacy rates and the presence of outliers. The trend line, despite some dispersion in data points, generally supports the idea that higher literacy could be associated with higher employment levels in the region.\
+\
+The graph titled "Employment vs Literacy Across States for 2019" shows the relationship between literacy rates and employment rates across various Indian states. Each colored dot represents a different state, plotted by its literacy rate on the horizontal axis and employment rate on the vertical axis. The overall trend, as indicated by the black trend line, suggests a negative correlation between literacy rates and employment rates. This means that states with higher literacy rates tend to have slightly lower employment rates, although the relationship does not appear very strong, given the spread of the data points across the plot.\
+\
+The graph titled "Beneficiary rate of PMJDY from 2016 - 2020" shows the beneficiary rate of the PMJDY program from 2016 to 2020. The rate began at approximately 20 in 2016, increased in 2017, then significantly dropped in 2018, before rising sharply in 2019 and continuing to increase in 2020. This trend suggests fluctuations in the program's uptake over these years, which might be influenced by various factors such as policy changes, economic conditions, or program awareness campaigns. The steady rise after the drop in 2018 indicates recovery and potentially successful interventions to boost enrollment.
 
 ## Models
 
@@ -539,6 +544,16 @@ predictions = unlab(predictions)
 
 The best machine learning model among the three different options tried was LASSO. This model used hyper parameter tuning to select the best combination and strength of the indicators. The best LASSO model created above has a high R squared with somewhat low RMSE compared to the other models. This means it can be an adequate model to predict the take up of the PMJDY program. We can see that the predictions are a few percentage points off, so although the prediction is approximately accurate, it is important to note that the predictions are not very precise.
 
-For the context of this program, this model can be used to predict the take up of the program in a certain place. The model would be a helpful tool because it can approximately predict if there will be a high enough take up rate that will make the investment/government expenditure worth it. 
+For the context of this program, this model can be used to predict the take up of the program in a certain place. The model would be a helpful tool because it can approximately predict if there will be a high enough take up rate that will make the investment/government expenditure worth it.
 
 # 5. Discussion of the results
+
+The results indicate that PMJDY is effectively targeting populations that most need financial inclusion services, as evidenced by higher take-up rates in areas with lower socioeconomic indices. This supports PMJDY's goal of broadening financial access to under-served segments, promoting equitable economic growth.\
+\
+However, the relationship between the literacy rate and the take up rate is unclear. This is because for the state of Delhi there is a positive correlation. However, for other states we see there is a slightly negative correlation. Although the relationship is not strong, it would not be good to make a generalized statement like that. Therefore, we need to consider many other factors that would play a role in actually influencing the take up rate of the PMJDY scheme.\
+\
+Therefore, despite the insights gained, the analysis faces limitations such as the availability and granularity of data, which may impact the comprehensiveness and accuracy of the findings. Additionally, external factors influencing financial inclusion, such as local economic conditions and cultural attitudes towards banking, were not fully accounted for in the models. These limitations suggest the need for more detailed data and a broad range of indicators to refine the predictive model and interpretations further. \
+\
+The data is able to provide us with some understanding of which model would be the best to able to guide us to make policy adjustments in the scheme and improve resource allocation. But another limitation of this analysis is the reliance on state-level data, which might mask important variations at more localized levels. Additionally, while the models predict take-up rates effectively, they might oversimplify the complexities of financial behavior, which is influenced by a multitude of socio-economic and cultural factors. The temporal scope of the data also restricts the ability to capture long-term trends and impacts of recent policy changes. Future research could benefit from incorporating more granular data and longitudinal studies to better understand the dynamics of financial inclusion.
+
+\
