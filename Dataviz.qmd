@@ -1,0 +1,12 @@
+---
+title: "Data Science for Public Policy"
+subtitle: "Final Project: Predicting the PMJDY Takeup Rate in India"
+author: "Meenakshi Alagusundaram - ma2309, Sanya Bahal - sb2063, Diana Rivas - dnr36, Sona Sarin - srs368"
+execute:
+  warning: false
+format:
+  html:
+    embed-resources: true
+---
+
+## 
