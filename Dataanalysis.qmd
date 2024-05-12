@@ -11,6 +11,70 @@ format:
 
 # Data Analysis
 
+## Loading Libraries
+
+```{r}
+library(tidyverse)
+library(haven)
+library(dplyr)
+library(ggplot2)
+library(tidymodels)
+library(readr)  
+library(ranger)
+library(sf)
+library(rgeoboundaries)
+library(ggthemes)
+library(rlang)
+library(expss)
+library(patchwork)
+library(rsample)
+library(tidyclust)
+library(factoextra)
+library(broom)
+library(yardstick)
+library(vip)
+library(parsnip)
+library(recipes)
+library(themis)
+```
+
+```{r Prepping data }
+
+pmjdy <- read_dta("PMJDYmaster.dta")%>% 
+  filter(!year == 2021) %>% # There is no pmjdy take up data for this year
+  select(!partyinpower_dummy) # Unnecessary variable
+
+# Editing latitude and longitude data due to Punjab, Chandigarh and Haryana having the same coordinates since they have the same capitals. 
+pmjdy <- pmjdy %>%
+  mutate(
+    Latitude = case_when(
+      Latitude == 18.9 ~ 19.8,
+      Latitude == 17.5 ~ 15.9,
+      TRUE ~ Latitude  
+    ),
+    Longitude = case_when(
+      Longitude == 72.8 ~ 75.7, 
+      Longitude == 78.6 ~ 79.7,
+      TRUE ~ Longitude  
+    )
+  )
+
+# Changing all variable names to lower case
+names(pmjdy) <- tolower(names(pmjdy))
+
+# Editing variables so that they can be used later in the geospatial analysis titles 
+pmjdy = apply_labels(pmjdy, 
+                     pmjdy = "PMJDY Uptake",
+                     healthindex = "Health Index", 
+                     incomeindex = "Income Index",
+                     educationindex = "Education Index",
+                     partyinpower = "Party in Power",
+                     employment = "Employment",
+                     pop = "Population"
+                     )
+
+```
+
 ## Geospatial Analysis
 
 ```{r}
@@ -77,4 +141,4 @@ choro_edu + choro_emp + choro_income
 
 This geospatial analysis of the state level characteristics helps visualize the correlation between different indicators and the PMJDY take up rate. The first choropleth shows the take-up rates across India and we can see that the highest rates are found in the north east part of the country, in states such as Assam and Chhattisgarh.
 
-Upon further exploration we see that the areas with the highest PMJDY take up are also those with lower educational index, employment rates and income. This correlation suggests that the program was able to successfully target its intended population. A limitation for this finding is that it merely represents a correlation and not a causal link. Further analysis on the data will be conducted to create a model that optimizes accuracy to predict the take up rate based on the indicators explored through this geospatial analysis.\`
+Upon further exploration we see that the areas with the highest PMJDY take up are also those with lower educational index, employment rates and income. This correlation suggests that the program was able to successfully target its intended population. A limitation for this finding is that it merely represents a correlation and not a causal link. Further analysis on the data will be conducted to create a model that optimizes accuracy to predict the take up rate based on the indicators explored through this geospatial analysis.
