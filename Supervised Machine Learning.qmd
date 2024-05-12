@@ -11,6 +11,73 @@ format:
 
 ## Supervised Machine Learning Models
 
+## Loading Libraries
+
+```{r}
+
+library(tidyverse)
+library(haven)
+library(dplyr)
+library(ggplot2)
+library(tidymodels)
+library(readr)  
+library(ranger)
+library(sf)
+library(rgeoboundaries)
+library(ggthemes)
+library(rlang)
+library(expss)
+library(patchwork)
+library(rsample)
+library(tidyclust)
+library(factoextra)
+library(broom)
+library(yardstick)
+library(vip)
+library(parsnip)
+library(recipes)
+library(themis)
+
+
+```
+
+## Preparing data 
+
+```{r}
+pmjdy <- read_dta("PMJDYmaster.dta")%>% 
+  filter(!year == 2021) %>% # There is no pmjdy take up data for this year
+  select(!partyinpower_dummy) # Unnecessary variable
+
+# Editing latitude and longitude data due to Punjab, Chandigarh and Haryana having the same coordinates since they have the same capitals. 
+pmjdy <- pmjdy %>%
+  mutate(
+    Latitude = case_when(
+      Latitude == 18.9 ~ 19.8,
+      Latitude == 17.5 ~ 15.9,
+      TRUE ~ Latitude  
+    ),
+    Longitude = case_when(
+      Longitude == 72.8 ~ 75.7, 
+      Longitude == 78.6 ~ 79.7,
+      TRUE ~ Longitude  
+    )
+  )
+
+# Changing all variable names to lower case
+names(pmjdy) <- tolower(names(pmjdy))
+
+# Editing variables so that they can be used later in the geospatial analysis titles 
+pmjdy = apply_labels(pmjdy, 
+                     pmjdy = "PMJDY Uptake",
+                     healthindex = "Health Index", 
+                     incomeindex = "Income Index",
+                     educationindex = "Education Index",
+                     partyinpower = "Party in Power",
+                     employment = "Employment",
+                     pop = "Population"
+                     )
+```
+
 ### Set Up for Models and EDA through data visualization
 
 ```{r}
