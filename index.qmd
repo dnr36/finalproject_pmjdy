@@ -1,0 +1,560 @@
+---
+title: "Data Science for Public Policy"
+subtitle: "Final Project: Predicting the PMJDY Takeup Rate in India"
+author: "Meenakshi Alagusundaram - ma2309, Sanya Bahal - sb2063, Diana Rivas - dnr36, Sona Sarin - srs368"
+execute:
+  warning: false
+format:
+  html:
+    embed-resources: true
+---
+
+# 1. Background and Literature Review
+
+## Background
+
+According to the G20 report published by Global Partnership in 2023, India had set a target of achieving 80 percent financial inclusion (i.e., 80 percent of its population has access to financial services), which the nation achieved at the country level in 6 years (41 years ahead of the target). To achieve this target, India launched numerous financial inclusion programs at the national level. PMJDY was launched nationwide in 2014 in India. Administered by the Ministry of Finance, this policy seeks to increase financial undefinedinclusion among lower income groups of the Indian society. In doing so, the policy offers an array of financial services, including savings accounts, debit cards, pension, accident and life insurance, access to credit, and programs aiming to increase financial literacy to individuals. Eligible individuals include Indian citizens above 10 years of age. \
+\
+\
+***PMJDY Services***\
+\
+
+Financial services other than a savings account are administered through interaction and coordination with other schemes. Access to credit under PMJDY is facilitated through an overdraft facility, which becomes available to account holders after six months of satisfactory operation of their accounts. This facility aims to provide a financial safety net and promote small-scale entrepreneurship. For pension services, PMJDY links with schemes like the Pradhan Mantri Shram Yogi Maan-Dhan (PMSYM) and the National Pension Scheme (NPS), catering primarily to the unorganized sector. These schemes allow individuals to voluntarily contribute to a pension account during their working life, ensuring financial stability in old age. PMJDY accounts also serve as conduits for beneficiaries to enroll in other government programs, such as accident and life insurance under Pradhan Mantri Suraksha Bima Yojana (PMSBY) and Pradhan Mantri Jeevan Jyoti Bima Yojana (PMJJBY), respectively.
+
+## Literature Review
+
+Literature suggests that PMJDY is likely to be associated with an increase in financial inclusion (Naik et al., 2018; Gupta 2023; Senapati 2018). However, despite this progress, some marginalized groups (e.g., women, lower income groups, lesser educated population) of the population remain underbanked or underserved by the banking sector (Ravi et al., 2019; Barik et al., 2019). 
+
+***Program Participation***
+
+As of the program's nine-year mark (2023), PMJDY included over 500 million people in the formal banking system (Jayaswal, 2023). Notably, about 67 percent of these accounts were opened in rural and semi-urban areas. Additionally, around 340 million debit cards have been issued, and 2 lakh Indian Rupee (INR) (approximately \$2400 USD) in accident insurance coverage have provided an added layer of financial security. 
+
+The participation rate of PMJDY, as found by our analysis, reveals an increase from an average of 18.8 percent in 2016 to 26.2 percent in 2020. This means that on average, 18.8 percent of the population in each state was participating in the policy as compared to 26.2 percent in 2020, a 7.4 percentage point increase. 
+
+***Challenges Faced by PMJDY*** 
+
+PMJDY, like many social programs, has faced some implementation challenges. One of the primary challenges is managing duplicate and dormant accounts, which can skew estimates of the program's effectiveness and resource allocation. This issue is closely tied to the need for enhancing financial literacy among the beneficiaries, ensuring they understand and utilize the financial services offered effectively (Malik et al., 2023).
+
+While that challenge is valid across geographies, a challenge particularly acute for rural areas is internet connectivity. Inadequate networking and bandwidth issues present hindrances in administering the program smoothly, especially in rural areas. These issues are particularly challenging in areas where banking infrastructure is already limited. The scarcity of ATMs in rural areas is one such barrier. Many beneficiaries are not accustomed to or lack easy access to ATMs and find it challenging to utilize these services effectively. In addition, a notable gender disparity exists within the banking sector, suggesting that women may not be reaping the benefits of the scheme as much as men. This gender gap points to a need for more inclusive financial services.\
+
+# 2. Data Sources
+
+# 3. Data Wrangling and Exploratory Data Analysis
+
+### Loading Libraries
+
+```{r Libraries }
+library(tidyverse)
+library(haven)
+library(dplyr)
+library(ggplot2)
+library(tidymodels)
+library(readr)  
+library(ranger)
+library(sf)
+library(rgeoboundaries)
+library(ggthemes)
+library(rlang)
+library(expss)
+library(patchwork)
+library(rsample)
+library(tidyclust)
+library(factoextra)
+library(broom)
+library(yardstick)
+library(vip)
+library(parsnip)
+library(recipes)
+library(themis)
+```
+
+```{r Prepping data }
+
+pmjdy <- read_dta("PMJDYmaster.dta")%>% 
+  filter(!year == 2021) %>% # There is no pmjdy take up data for this year
+  select(!partyinpower_dummy) # Unnecessary variable
+
+# Editing latitude and longitude data due to Punjab, Chandigarh and Haryana having the same coordinates since they have the same capitals. 
+pmjdy <- pmjdy %>%
+  mutate(
+    Latitude = case_when(
+      Latitude == 18.9 ~ 19.8,
+      Latitude == 17.5 ~ 15.9,
+      TRUE ~ Latitude  
+    ),
+    Longitude = case_when(
+      Longitude == 72.8 ~ 75.7, 
+      Longitude == 78.6 ~ 79.7,
+      TRUE ~ Longitude  
+    )
+  )
+
+# Changing all variable names to lower case
+names(pmjdy) <- tolower(names(pmjdy))
+
+# Editing variables so that they can be used later in the geospatial analysis titles 
+pmjdy = apply_labels(pmjdy, 
+                     pmjdy = "PMJDY Uptake",
+                     healthindex = "Health Index", 
+                     incomeindex = "Income Index",
+                     educationindex = "Education Index",
+                     partyinpower = "Party in Power",
+                     employment = "Employment",
+                     pop = "Population"
+                     )
+
+
+```
+
+```{r}
+
+# Summary Statistics
+
+# PMJDY 
+n_pmjdy <- length(pmjdy$pmjdy)
+
+mean_pmjdy <- mean(pmjdy$pmjdy, na.rm = TRUE)
+
+sd_pmjdy <- sd(pmjdy$pmjdy, na.rm = TRUE)
+
+min_pmjdy <- min(pmjdy$pmjdy, na.rm = TRUE)
+
+max_pmjdy <- max(pmjdy$pmjdy, na.rm = TRUE)
+
+# Inflation
+n_inflation <- length(pmjdy$inflation)
+
+mean_inflation <- mean(pmjdy$inflation, na.rm = TRUE)
+
+sd_inflation <- sd(pmjdy$inflation, na.rm = TRUE)
+
+min_inflation <- min(pmjdy$inflation, na.rm = TRUE)
+
+max_inflation <- max(pmjdy$inflation, na.rm = TRUE)
+
+# GDP 
+n_gdp <- length(pmjdy$GDP)
+
+mean_gdp <- mean(pmjdy$GDP, na.rm = TRUE)
+
+sd_gdp <- sd(pmjdy$GDP, na.rm = TRUE)
+
+min_gdp <- min(pmjdy$GDP, na.rm = TRUE)
+
+max_gdp <- max(pmjdy$GDP, na.rm = TRUE)
+
+# Health index
+n_healthindex <- length(pmjdy$healthindex)
+
+mean_healthindex <- mean(pmjdy$healthindex, na.rm = TRUE)
+
+sd_healthindex <- sd(pmjdy$healthindex, na.rm = TRUE)
+
+min_healthindex <- min(pmjdy$healthindex, na.rm =TRUE)
+
+max_healthindex <- max(pmjdy$healthindex, na.rm = TRUE)
+
+# Income index 
+n_incomeindex <- length(pmjdy$Incomeindex)
+
+mean_incomeindex <- mean(pmjdy$Incomeindex, na.rm = TRUE)
+
+sd_incomeindex <- sd(pmjdy$Incomeindex, na.rm = TRUE)
+
+min_incomeindex <- min(pmjdy$Incomeindex, na.rm =TRUE)
+
+max_incomeindex <- max(pmjdy$Incomeindex, na.rm = TRUE)
+
+# Education index 
+n_educationindex <- length(pmjdy$educationindex)
+
+mean_eduationindex <- mean(pmjdy$educationindex, na.rm = TRUE)
+
+sd_educationindex <- sd(pmjdy$educationindex, na.rm = TRUE)
+
+min_educationindex <- min(pmjdy$educationindex, na.rm =TRUE)
+
+max_educationindex <- max(pmjdy$educationindex, na.rm = TRUE)
+
+# Employment
+n_employment <- length(pmjdy$employment)
+
+mean_employment <- mean(pmjdy$employment, na.rm = TRUE)
+
+sd_employment <- sd(pmjdy$employment, na.rm = TRUE)
+
+min_employment <- min(pmjdy$employment, na.rm =TRUE)
+
+max_employment <- max(pmjdy$employment, na.rm = TRUE)
+
+# Creating a table
+column1 <- c("PMJDY", "Inflation", "GDP", "Health Index", "Income Index", "Education Index", "Employment")
+column2 <- c(n_pmjdy, n_inflation, n_gdp, n_healthindex, n_incomeindex, n_educationindex, n_employment)
+column3 <- c(mean_pmjdy, mean_inflation, mean_gdp, mean_healthindex, mean_incomeindex, mean_eduationindex, mean_employment)
+column4 <- c(sd_pmjdy, sd_inflation, sd_gdp, sd_healthindex, sd_incomeindex, sd_educationindex, sd_employment)
+column5 <- c(min_pmjdy, min_inflation, min_gdp, min_healthindex, min_incomeindex, min_educationindex, min_employment)
+column6 <- c(max_pmjdy, max_inflation, max_gdp, max_healthindex, max_incomeindex, max_educationindex, max_employment)
+
+column_names <- c("Variable", "Observations", "Mean", "Std. Dev.", "Min", "Max")
+
+pmjdy_summarystats <- data.frame(Column1 = column1,
+                                 Column2 = column2,
+                                 Column3 = column3,
+                                 Column4 = column4,
+                                 Column5 = column5,
+                                 Column6 = column6)
+
+colnames(pmjdy_summarystats) <- column_names
+
+print(pmjdy_summarystats)
+
+
+```
+
+## Interpretation
+
+Based on the summary statistics we have generated, we can draw many insights. Some of the findings are:\
+
+-   **Average Take-up Rate (PMJDY):** The mean of 22.86 suggests a moderate level of bank account uptake under this scheme, with the minimum at 8.994 and the maximum at over 31, indicating significant variation among different states or over different years.
+
+-   **Inflation:\
+    \
+    ** The mean inflation rate across the dataset is 4.77, with a standard deviation of around 2.02, pointing to varying economic conditions across the states. The minimum inflation rate is quite low at 0.5, suggesting a period or state with very stable prices, while the maximum is higher at around 7.6.
+
+-   **GDP:**
+
+    With a mean GDP of approximately 1.37e+05 and a broad range from 22201 to over 3.26e+05, this indicates a substantial disparity in the economic size and output among the states. The high standard deviation reflects this significant variation.
+
+-   **Health, Income, and Education Indices:**
+
+    The health, income, and education indices have means around 0.8, 0.65, and 0.59 respectively. All these indices exhibit relatively low variability (standard deviations around 0.06-0.07), suggesting somewhat uniform conditions across the dataset in terms of health access, income levels, and educational attainment. However, the ranges indicate some outliers or significant differences in some areas.
+
+-   **Employment:**
+
+    The employment rate has a mean of around 49, with a very high standard deviation of about 7.91, showing that employment rates vary widely across states. The range from 27.5 to 73 highlights some regions with relatively low employment rates and others with very high employment.\
+    \
+    These statistics provide the context in which the PMJDY scheme is being implemented. The variations in economic conditions, inflation, and human development indices suggest differing regional challenges and potentials for financial inclusion. The analysis of these variables can provide deeper insights into how regional disparities might be influencing the uptake of the PMJDY scheme, aiming to enhance financial inclusivity across various socio-economic backgrounds.\
+    \
+    \
+
+# 4. Data Analysis
+
+## Geospatial Analysis
+
+```{r geospatial}
+
+# Making a SF to conduct geo-spatial analysis 
+sf_pmjdy <- st_as_sf(pmjdy, coords = c("longitude", "latitude")) %>%
+  st_set_crs(4326)
+
+# Loading data for the map of India 
+india <- geoboundaries(
+  country = "India",
+  adm_lvl = "adm1",
+  type = "simplified"
+  )
+
+# Setting crs as the same from sf_pmjdy to ensure spatial join is done correctly 
+india <- st_transform(india, crs = st_crs(sf_pmjdy))
+
+# Spatial join 
+india_pmjdy <- st_join(india, sf_pmjdy)
+
+# Making a function to make more choropleths 
+
+#' india_choropleth
+#'
+#' @description This function takes the argument of "indicator" and creates a choropleth for India. This helps to visualize the differences of similarities among the different states over a common indicator. 
+#' @param indicator 
+#'
+#' @return A choropleth map of India with the selected indicator.
+#' @export
+#'
+#' @examples india_choropleth(employment)
+#' 
+india_choropleth <- function(indicator) {
+  
+  india_pmjdy %>%
+    ggplot() +
+    geom_sf(aes(fill = !!sym(indicator)), color = "darkorange2", size = 0.1) +
+    scale_fill_gradient(
+        low = "white", 
+        high = "darkgreen",
+    ) +
+   labs(title = paste0(as.character(attr(india_pmjdy[[indicator]], "label")), " across India"), 
+      fill = attr(india_pmjdy[[indicator]], "label")) +
+    theme_void() +
+    theme(
+      plot.title = element_text(size = 12),
+       legend.title = element_text(size = 10) 
+    )
+   
+}
+
+# Variables of interest for PMJDY takeup are education, employment and income: 
+choro_pmjdy <- india_choropleth(indicator = "pmjdy")
+choro_edu <- india_choropleth(indicator = "educationindex")
+choro_emp <- india_choropleth(indicator = "employment")
+choro_income <- india_choropleth(indicator = "incomeindex")
+
+choro_pmjdy
+
+choro_edu + choro_emp + choro_income 
+
+
+
+```
+
+This geospatial analysis of the state level characteristics helps visualize the correlation between different indicators and the PMJDY take up rate. The first choropleth shows the take-up rates across India and we can see that the highest rates are found in the north east part of the country, in states such as Assam and Chhattisgarh.
+
+Upon further exploration we see that the areas with the highest PMJDY take up are also those with lower educational index, employment rates and income. This correlation suggests that the program was able to successfully target its intended population. A limitation for this finding is that it merely represents a correlation and not a causal link. Further analysis on the data will be conducted to create a model that optimizes accuracy to predict the take up rate based on the indicators explored through this geospatial analysis.
+
+## Supervised Machine Learning Models
+
+### Set Up for Models and EDA through data visualization
+
+```{r Supervised ML and EDA }
+
+# Employment vs Literacy for state Delhi 
+# Splitting data into training and testing data 
+set.seed(2588596)
+
+pmjdy_split <- initial_split(data = pmjdy, prop = 0.8)
+
+# Creating the training and testing data
+df_train <- training(x = pmjdy_split)
+df_test  <- testing(x = pmjdy_split)
+
+# Cross validation folds, tried to stratify by state but the data is too small 
+folds <- vfold_cv(df_train, v = 10)
+
+
+delhi_data <- df_train[df_train$state == "Delhi", ]
+
+# Create the plot
+eda1 <- ggplot(delhi_data, aes(x = educationindex, y = employment)) +
+  geom_point() +  # Adds the dot plot
+  geom_smooth(method = "lm", se = FALSE, color = "blue") +  
+  labs(x = "Literacy Rate", y = "Employment Rate", title = "Employment vs Literacy in Delhi") +
+  theme_minimal()  
+
+# employment vs literacy for all states for the year 2019 
+
+data_2019 <- df_train[df_train$year == 2019, ]
+
+# Create the plot for all states
+eda2 <- ggplot(data_2019, aes(x = educationindex, y = employment, color = state)) +
+  geom_point() +  
+  geom_smooth(method = "lm", se = FALSE, color = "black") +  
+  labs(x = "Literacy Rate", y = "Employment Rate", title = "Employment vs Literacy Across States for 2019") +
+  theme_minimal() +  # Uses a minimal theme for the plot
+  theme(legend.position = "bottom") 
+
+# pmjdy beneficiary rate over 2016 - 2020 
+# Calculating the mean of 'pmjdy' for each year
+annual_means <- df_train %>%
+  group_by(year) %>%
+  summarize(mean_pmjdy = mean(pmjdy, na.rm = TRUE))  
+
+# Plotting the annual mean of 'pmjdy'
+eda3 <- ggplot(annual_means, aes(x = year, y = mean_pmjdy)) +
+  geom_line(color = "blue", size = 1) +  # Adds a blue line connecting the mean values
+  geom_point(color = "red", size = 3) +  # Adds red points for each yearly mean
+  labs(x = "Year", y = "PMJDY", title = "Beneficiary rate of PMJDY from 2016 to 2020") +
+  theme_minimal() +
+  theme(legend.position = "none")  # No need for a legend  
+
+eda1
+
+eda2
+
+eda3
+
+```
+
+The graph titled "Employment vs Literacy in Delhi" shows a scatter plot of employment rates plotted against literacy rates in Delhi, with a trend line indicating a positive correlation between the two variables. The data points suggest that as literacy rates increase, employment rates also tend to increase, though the relationship is not very strong given the narrow range of literacy rates and the presence of outliers. The trend line, despite some dispersion in data points, generally supports the idea that higher literacy could be associated with higher employment levels in the region.\
+\
+The graph titled "Employment vs Literacy Across States for 2019" shows the relationship between literacy rates and employment rates across various Indian states. Each colored dot represents a different state, plotted by its literacy rate on the horizontal axis and employment rate on the vertical axis. The overall trend, as indicated by the black trend line, suggests a negative correlation between literacy rates and employment rates. This means that states with higher literacy rates tend to have slightly lower employment rates, although the relationship does not appear very strong, given the spread of the data points across the plot.\
+\
+The graph titled "Beneficiary rate of PMJDY from 2016 - 2020" shows the beneficiary rate of the PMJDY program from 2016 to 2020. The rate began at approximately 20 in 2016, increased in 2017, then significantly dropped in 2018, before rising sharply in 2019 and continuing to increase in 2020. This trend suggests fluctuations in the program's uptake over these years, which might be influenced by various factors such as policy changes, economic conditions, or program awareness campaigns. The steady rise after the drop in 2018 indicates recovery and potentially successful interventions to boost enrollment.
+
+## Models
+
+```{r Recipe }
+
+# Creating a recipe 
+
+pmjdy_rec <- recipe(pmjdy ~ state + year + incomeindex + educationindex, df_train)%>%
+  step_dummy(state) %>%
+  step_normalize(all_numeric(), -all_outcomes())
+
+
+```
+
+### Decision tree model
+
+```{r Decision tree model }
+
+# Decision tree specification 
+dt_spec <- decision_tree() %>%
+  set_engine("rpart") %>%
+  set_mode("regression")
+
+# Decision tree workflow 
+dt_wf <- workflow() %>%
+  add_recipe(pmjdy_rec) %>%
+  add_model(dt_spec)
+
+# Fitting decision tree
+dt_fit_rs <- dt_wf %>%
+  fit_resamples(resamples = folds,
+                control = control_resamples(save_pred = TRUE),
+                metrics = metric_set(rmse))
+
+# Decision tree metrics
+dt_metrics <- collect_metrics(dt_fit_rs, summarize = FALSE)
+
+
+# Calculating mean rsme
+tree_mean_rmse <- dt_metrics %>%
+  filter(.metric == "rmse") %>%
+  pull(.estimate) %>%
+  mean()
+
+```
+
+### Lasso model with hyper parameter tuning
+
+```{r Lasso model }
+# Lasso specification
+
+lasso_mod <- linear_reg(penalty = tune(), mixture = tune()) %>%
+    set_engine("glmnet") %>%
+  set_mode("regression")
+
+# Workflow and tuning grid 
+
+lasso_mod_wf <- workflow() %>%
+    add_model(spec = lasso_mod) %>%
+    add_recipe(recipe = pmjdy_rec)
+    
+    # creating tuning grid 
+    grid <- grid_regular(penalty(), mixture(), levels = 10)
+
+# Fitting model 
+    
+lasso_fit_rs <- lasso_mod_wf %>%
+    tune_grid(resamples = folds, 
+              grid = grid, 
+              control = control_grid(save_pred = TRUE),
+              metrics = metric_set(rmse))   
+
+# Calculating metrics 
+
+lasso_metrics <- lasso_fit_rs %>%
+    collect_metrics(summarize = FALSE)
+
+# Calculating mean RMSE for Lasso
+
+lasso_mean_rmse <- lasso_metrics %>%
+  filter(.metric == "rmse") %>%
+  pull(.estimate) %>%
+  mean()
+
+```
+
+### Random forest model
+
+```{r Random forest model }
+# Define the model specification
+rf_spec <- rand_forest(trees = 1000) %>%
+  set_mode("regression") %>%
+  set_engine("ranger")
+
+# Set up the workflow
+rf_wf <- workflow() %>%
+  add_recipe(pmjdy_rec) %>%
+  add_model(rf_spec)
+
+# Fitting model 
+rf_fit_rs <- rf_wf %>%
+    fit_resamples(resamples = folds, 
+                  control = control_resamples(save_pred = TRUE),
+                metrics = metric_set(rmse))
+
+# Calculating metrics 
+rf_metrics <- rf_fit_rs %>%
+    collect_metrics(summarize = FALSE)
+
+# Mean rmse 
+rf_mean_rmse <- rf_metrics %>%
+  filter(.metric == "rmse") %>%
+  pull(.estimate) %>%
+  mean()
+
+```
+
+### Visualizing the models
+
+```{r Visualizing the models }
+
+# Visualizing all models
+
+ggplot() +
+geom_point(data = lasso_metrics %>% filter(.metric == "rmse"), aes(x= id, y =.estimate, color = "Lasso")) +
+geom_point(data = dt_metrics %>% filter(.metric == "rmse"), aes(x= id, y =.estimate, color = "Tree")) +
+geom_point(data = rf_metrics %>% filter(.metric == "rmse"), aes(x= id, y =.estimate, color = "KNN")) +
+labs( title = "RMSE by model and by fold", color = "Model", x = "Fold", y = "Estimate" )
+
+
+```
+
+### Estimation
+
+```{r Estimations }
+# Selecting best models, however from the calculation of the mean RMSE above, we know that lasso leads to the lowest root mean square error 
+
+best_lasso <- lasso_fit_rs %>%
+  select_best(metric = "rmse") 
+
+final_lasso <- finalize_workflow(
+  lasso_mod_wf,
+  best_lasso) %>%
+    fit(data = df_train)
+
+# Making predictions on the testing data
+predictions <- 
+    bind_cols(
+        df_test, 
+        predict(object = final_lasso, new_data = df_test)
+    )
+
+# Printing results
+predictions %>%
+  select(pmjdy, .pred) %>%
+  print()
+
+# Removing label from the "truth" variable, pmjdy, so that the model can be evaluated
+predictions = unlab(predictions)
+
+# Evaluating model 
+ predictions %>%
+  metrics(truth = pmjdy, estimate = .pred)
+```
+
+The best machine learning model among the three different options tried was LASSO. This model used hyper parameter tuning to select the best combination and strength of the indicators. The best LASSO model created above has a high R squared with somewhat low RMSE compared to the other models. This means it can be an adequate model to predict the take up of the PMJDY program. We can see that the predictions are a few percentage points off, so although the prediction is approximately accurate, it is important to note that the predictions are not very precise.
+
+For the context of this program, this model can be used to predict the take up of the program in a certain place. The model would be a helpful tool because it can approximately predict if there will be a high enough take up rate that will make the investment/government expenditure worth it.
+
+# 5. Discussion of the results
+
+The results indicate that PMJDY is effectively targeting populations that most need financial inclusion services, as evidenced by higher take-up rates in areas with lower socioeconomic indices. This supports PMJDY's goal of broadening financial access to under-served segments, promoting equitable economic growth.\
+\
+However, the relationship between the literacy rate and the take up rate is unclear. This is because for the state of Delhi there is a positive correlation. However, for other states we see there is a slightly negative correlation. Although the relationship is not strong, it would not be good to make a generalized statement like that. Therefore, we need to consider many other factors that would play a role in actually influencing the take up rate of the PMJDY scheme.\
+\
+Therefore, despite the insights gained, the analysis faces limitations such as the availability and granularity of data, which may impact the comprehensiveness and accuracy of the findings. Additionally, external factors influencing financial inclusion, such as local economic conditions and cultural attitudes towards banking, were not fully accounted for in the models. These limitations suggest the need for more detailed data and a broad range of indicators to refine the predictive model and interpretations further.\
+\
+The data is able to provide us with some understanding of which model would be the best to able to guide us to make policy adjustments in the scheme and improve resource allocation. But another limitation of this analysis is the reliance on state-level data, which might mask important variations at more localized levels. Additionally, while the models predict take-up rates effectively, they might oversimplify the complexities of financial behavior, which is influenced by a multitude of socio-economic and cultural factors. The temporal scope of the data also restricts the ability to capture long-term trends and impacts of recent policy changes. Future research could benefit from incorporating more granular data and longitudinal studies to better understand the dynamics of financial inclusion.
+
+\
+\
