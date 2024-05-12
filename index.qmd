@@ -569,8 +569,9 @@ Therefore, despite the insights gained, the analysis faces limitations such as t
 The data is able to provide us with some understanding of which model would be the best to able to guide us to make policy adjustments in the scheme and improve resource allocation. But another limitation of this analysis is the reliance on state-level data, which might mask important variations at more localized levels. Additionally, while the models predict take-up rates effectively, they might oversimplify the complexities of financial behavior, which is influenced by a multitude of socio-economic and cultural factors. The temporal scope of the data also restricts the ability to capture long-term trends and impacts of recent policy changes. Future research could benefit from incorporating more granular data and longitudinal studies to better understand the dynamics of financial inclusion.
 
 \
-\
+
 # Bibliography 
+
 World Bank. G20 Policy Recommendations for Advancing Financial Inclusion and Productivity Gains through Digital Public Infrastructure: Global Partnership for Financial Inclusion 2023. Washington, DC, 2023. DOI.org (Crossref), https://doi.org/10.1596/40421
 
 Singh, Charan, and Gopal Naik. Financial Inclusion After PMJDY: A Case Study of Gubbi Taluk, Tumkur. 28 Mar. 2018. Social Science Research Network, https://doi.org/10.2139/ssrn.3151257
