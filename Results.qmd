@@ -1,0 +1,26 @@
+---
+title: "Data Science for Public Policy"
+subtitle: "Final Project: Predicting the PMJDY Takeup Rate in India"
+author: "Meenakshi Alagusundaram - ma2309, Sanya Bahal - sb2063, Diana Rivas - dnr36, Sona Sarin - srs368"
+execute:
+  warning: false
+format:
+  html:
+    embed-resources: true
+---
+
+# Discussion of the results
+
+Our analysis of the PMJDY scheme shows a moderate overall take-up rate with significant regional variability, indicated by an average rate of 22.86. Economic indicators such as inflation and GDP exhibit wide disparities across states, highlighting different economic conditions. Health, income, and education indices are relatively uniform but do show regional variations. Particularly, states with lower education and income indices have higher PMJDY take-up rates, suggesting effective targeting of the intended demographic.
+
+Geospatial analysis supports this, showing the highest engagement in less economically developed areas. Machine learning models, specifically LASSO, proved effective in predicting take-up rates, outperforming Decision Tree and Random Forest models. The optimized LASSO model demonstrated strong predictive power with a high R-squared and relatively low RMSE, making it a reliable tool for forecasting PMJDY uptake based on state-specific indicators.\
+\
+The results indicate that PMJDY is effectively targeting populations that most need financial inclusion services, as evidenced by higher take-up rates in areas with lower socioeconomic indices. This supports PMJDY's goal of broadening financial access to under-served segments, promoting equitable economic growth.\
+\
+However, the relationship between the literacy rate and the take up rate is unclear. This is because for the state of Delhi there is a positive correlation. However, for other states we see there is a slightly negative correlation. Although the relationship is not strong, it would not be good to make a generalized statement like that. Therefore, we need to consider many other factors that would play a role in actually influencing the take up rate of the PMJDY scheme.\
+\
+Therefore, despite the insights gained, the analysis faces limitations such as the availability and granularity of data, which may impact the comprehensiveness and accuracy of the findings. Additionally, external factors influencing financial inclusion, such as local economic conditions and cultural attitudes towards banking, were not fully accounted for in the models. These limitations suggest the need for more detailed data and a broad range of indicators to refine the predictive model and interpretations further. \
+\
+The data is able to provide us with some understanding of which model would be the best to able to guide us to make policy adjustments in the scheme and improve resource allocation. But another limitation of this analysis is the reliance on state-level data, which might mask important variations at more localized levels. Additionally, while the models predict take-up rates effectively, they might oversimplify the complexities of financial behavior, which is influenced by a multitude of socio-economic and cultural factors. The temporal scope of the data also restricts the ability to capture long-term trends and impacts of recent policy changes. Future research could benefit from incorporating more granular data and longitudinal studies to better understand the dynamics of financial inclusion.
+
+\
