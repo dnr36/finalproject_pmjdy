@@ -13,7 +13,7 @@ format:
 
 ## Background
 
-According to the G20 report published by Global Partnership in 2023, India had set a target of achieving 80 percent financial inclusion (i.e., 80 percent of its population has access to financial services), which the nation achieved at the country level in 6 years (41 years ahead of the target). To achieve this target, India launched numerous financial inclusion programs at the national level. PMJDY was launched nationwide in 2014 in India. Administered by the Ministry of Finance, this policy seeks to increase financial undefinedinclusion among lower income groups of the Indian society. In doing so, the policy offers an array of financial services, including savings accounts, debit cards, pension, accident and life insurance, access to credit, and programs aiming to increase financial literacy to individuals. Eligible individuals include Indian citizens above 10 years of age. \
+According to the G20 report published by Global Partnership in 2023, India had set a target of achieving 80 percent financial inclusion (i.e., 80 percent of its population has access to financial services), which the nation achieved at the country level in 6 years (41 years ahead of the target). To achieve this target, India launched numerous financial inclusion programs at the national level. PMJDY was launched nationwide in 2014 in India. Administered by the Ministry of Finance, this policy seeks to increase financial undefined inclusion among lower income groups of the Indian society. In doing so, the policy offers an array of financial services, including savings accounts, debit cards, pension, accident and life insurance, access to credit, and programs aiming to increase financial literacy to individuals. Eligible individuals include Indian citizens above 10 years of age. \
 \
 \
 ***PMJDY Services***\
@@ -38,6 +38,8 @@ PMJDY, like many social programs, has faced some implementation challenges. One 
 While that challenge is valid across geographies, a challenge particularly acute for rural areas is internet connectivity. Inadequate networking and bandwidth issues present hindrances in administering the program smoothly, especially in rural areas. These issues are particularly challenging in areas where banking infrastructure is already limited. The scarcity of ATMs in rural areas is one such barrier. Many beneficiaries are not accustomed to or lack easy access to ATMs and find it challenging to utilize these services effectively. In addition, a notable gender disparity exists within the banking sector, suggesting that women may not be reaping the benefits of the scheme as much as men. This gender gap points to a need for more inclusive financial services.\
 
 # 2. Data Sources
+
+Gross State Domestic Product (GSDP), which measures the GDP of each state or territory, is sourced from the Reserve Bank of India. The independent variable, PMJDY per capita, represents the number of PMJDY beneficiaries per capita in each state or territory, calculated based on savings account data from the Open Government Data Platform India. Additional economic factors considered include inflation and employment rates, both continuous variables; inflation data comes from the Reserve Bank of India, and employment data, which measures the percentage of employed individuals aged 15 and above, is provided by the Ministry of Labor and Employment. Lastly, the Income Index, an index measuring household wealth on a scale from 0 to 1, is sourced from the Global Data Lab. The data for longitude and latitude of all states was gathered from a publication by Ramachandran et al., 2008 which borrowed data from India’s Census (2001).
 
 # 3. Data Wrangling and Exploratory Data Analysis
 
@@ -73,7 +75,7 @@ library(tune)
 ```{r Prepping data }
 
 pmjdy <- read_dta("PMJDYmaster.dta")%>% 
-  filter(!year == 2021) %>% # There is no pmjdy take up data for this year
+  filter(!year == 2021) %>% # There is no pmjdy take-up data for this year
   select(!partyinpower_dummy) # Unnecessary variable
 
 # Editing latitude and longitude data due to Punjab, Chandigarh and Haryana having the same coordinates since they have the same capitals. 
@@ -108,7 +110,7 @@ pmjdy = apply_labels(pmjdy,
 
 ```
 
-```{r}
+```{r Summary Statistics}
 
 # Summary Statistics
 
@@ -307,9 +309,9 @@ choro_edu + choro_emp + choro_income
 
 ```
 
-This geospatial analysis of the state level characteristics helps visualize the correlation between different indicators and the PMJDY take up rate. The first choropleth shows the take-up rates across India and we can see that the highest rates are found in the north east part of the country, in states such as Assam and Chhattisgarh.
+This geospatial analysis of the state level characteristics helps visualize the correlation between different indicators and the PMJDY take-up rate. The first choropleth shows the take-up rates across India and we can see that the highest rates are found in the north east part of the country, in states such as Assam and Chhattisgarh.
 
-Upon further exploration we see that the areas with the highest PMJDY take up are also those with lower educational index, employment rates and income. This correlation suggests that the program was able to successfully target its intended population. A limitation for this finding is that it merely represents a correlation and not a causal link. Further analysis on the data will be conducted to create a model that optimizes accuracy to predict the take up rate based on the indicators explored through this geospatial analysis.
+Upon further exploration we see that the areas with the highest PMJDY take-up are also those with lower educational index, employment rates and income. This correlation suggests that the program was able to successfully target its intended population. A limitation for this finding is that it merely represents a correlation and not a causal link. Further analysis on the data will be conducted to create a model that optimizes accuracy to predict the take-up rate based on the indicators explored through this geospatial analysis.
 
 ## Supervised Machine Learning Models
 
@@ -364,9 +366,9 @@ annual_means <- df_train %>%
 eda3 <-  ggplot(annual_means, aes(x = reorder(state, mean_pmjdy), y = mean_pmjdy, fill = as.factor(educated))) +
   geom_bar(stat = "identity", 
            na.rm = TRUE) +
-  labs(title = "Analysing the the PMJDY take up rate in 2019", 
+  labs(title = "Analysing the the PMJDY take-up rate in 2019", 
        x = "Name of the State", 
-       y = "PMJDY take up rate") +
+       y = "PMJDY take-up rate") +
   scale_fill_manual(values = c("Cyan3", "Salmon"),
                     name = "Level of Education",
                     labels = c("High level of education", "Low level of education")) + 
@@ -386,7 +388,7 @@ The graph titled "Employment vs Literacy in Delhi" shows a scatter plot of emplo
 \
 The graph titled "Employment vs Literacy Across States for 2019" shows the relationship between literacy rates and employment rates across various Indian states. Each colored dot represents a different state, plotted by its literacy rate on the horizontal axis and employment rate on the vertical axis. The overall trend, as indicated by the black trend line, suggests a negative correlation between literacy rates and employment rates. This means that states with higher literacy rates tend to have slightly lower employment rates, although the relationship does not appear very strong, given the spread of the data points across the plot.\
 \
-The graph titled "Analyzing the PMJDY take up rate in 2019" shows the beneficiary rate of the PMJDY program from in 2019 for all states according to their level of education. We can see how states with higher rates of literacy are associated with a higher take up rate of the program, highlighting the importance of education in understanding and utilizing policies. On the other hand, states with lower levels of education are associated with a lower take up rate of PMJDY.
+The graph titled "Analyzing the PMJDY take-up rate in 2019" shows the beneficiary rate of the PMJDY program from in 2019 for all states according to their level of education. We can see how states with higher rates of literacy are associated with a higher take-up rate of the program, highlighting the importance of education in understanding and utilizing policies. On the other hand, states with lower levels of education are associated with a lower take-up rate of PMJDY.
 
 ## Models
 
@@ -552,15 +554,15 @@ predictions = unlab(predictions)
   metrics(truth = pmjdy, estimate = .pred)
 ```
 
-The best machine learning model among the three different options tried was LASSO. This model used hyper parameter tuning to select the best combination and strength of the indicators. The best LASSO model created above has a high R squared with somewhat low RMSE compared to the other models. This means it can be an adequate model to predict the take up of the PMJDY program. We can see that the predictions are a few percentage points off, so although the prediction is approximately accurate, it is important to note that the predictions are not very precise.
+The best machine learning model among the three different options tried was LASSO. This model used hyper parameter tuning to select the best combination and strength of the indicators. The best LASSO model created above has a high R squared with somewhat low RMSE compared to the other models. This means it can be an adequate model to predict the take-up of the PMJDY program. We can see that the predictions are a few percentage points off, so although the prediction is approximately accurate, it is important to note that the predictions are not very precise.
 
-For the context of this program, this model can be used to predict the take up of the program in a certain place. The model would be a helpful tool because it can approximately predict if there will be a high enough take up rate that will make the investment/government expenditure worth it.
+For the context of this program, this model can be used to predict the take-up of the program in a certain place. The model would be a helpful tool because it can approximately predict if there will be a high enough take-up rate that will make the investment/government expenditure worth it.
 
 # 5. Discussion of the results
 
 The results indicate that PMJDY is effectively targeting populations that most need financial inclusion services, as evidenced by higher take-up rates in areas with lower socioeconomic indices. This supports PMJDY's goal of broadening financial access to under-served segments, promoting equitable economic growth.\
 \
-However, the relationship between the literacy rate and the take up rate is unclear. This is because for the state of Delhi there is a positive correlation. However, for other states we see there is a slightly negative correlation. Although the relationship is not strong, it would not be good to make a generalized statement like that. Therefore, we need to consider many other factors that would play a role in actually influencing the take up rate of the PMJDY scheme.\
+However, the relationship between the literacy rate and the take-up rate is unclear. This is because for the state of Delhi there is a positive correlation. However, for other states we see there is a slightly negative correlation. Although the relationship is not strong, it would not be good to make a generalized statement like that. Therefore, we need to consider many other factors that would play a role in actually influencing the take-up rate of the PMJDY scheme.\
 \
 Therefore, despite the insights gained, the analysis faces limitations such as the availability and granularity of data, which may impact the comprehensiveness and accuracy of the findings. Additionally, external factors influencing financial inclusion, such as local economic conditions and cultural attitudes towards banking, were not fully accounted for in the models. These limitations suggest the need for more detailed data and a broad range of indicators to refine the predictive model and interpretations further.\
 \
@@ -568,3 +570,15 @@ The data is able to provide us with some understanding of which model would be t
 
 \
 \
+# Bibliography 
+World Bank. G20 Policy Recommendations for Advancing Financial Inclusion and Productivity Gains through Digital Public Infrastructure: Global Partnership for Financial Inclusion 2023. Washington, DC, 2023. DOI.org (Crossref), https://doi.org/10.1596/40421
+
+Singh, Charan, and Gopal Naik. Financial Inclusion After PMJDY: A Case Study of Gubbi Taluk, Tumkur. 28 Mar. 2018. Social Science Research Network, https://doi.org/10.2139/ssrn.3151257
+
+Gupta, Kamini. “Pradhan Mantri Jan Dhan Yojana: History and Present Impact.” South Asian Journal of Social Studies and Economics, vol. 19, no. 2, May 2023, pp. 21–27. DOI.org (Crossref), https://doi.org/10.9734/sajsse/2023/v19i2674.  
+
+Senapati, Partha Sarathi. A Study of Pradhan Mantri Jan Dhan Yojana (PMJDY) Scheme in Odisha and Challenges of Financial Inclusion. 27 Apr. 2018. Social Science Research Network, https://papers.ssrn.com/abstract=3169838.   
+
+Barik, Rajesh, and Pritee Sharma. “Analyzing the Progress and Prospects of Financial Inclusion in India.” Journal of Public Affairs, vol. 19, no. 4, Nov. 2019, p. e1948. DOI.org (Crossref), https://doi.org/10.1002/pa.1948
+
+Malik, Firdous Ahmad, and Khair ul Samar. Jan Dhan Yojana: A Decade of Democratising Banking in India | Policy Circle. https://www.policycircle.org/opinion/jan-dhan-yojana-pmjdy-10-years/
