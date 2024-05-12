@@ -66,6 +66,8 @@ library(vip)
 library(parsnip)
 library(recipes)
 library(themis)
+library(knitr)
+library(tune)
 ```
 
 ```{r Prepping data }
@@ -188,6 +190,7 @@ min_employment <- min(pmjdy$employment, na.rm =TRUE)
 max_employment <- max(pmjdy$employment, na.rm = TRUE)
 
 # Creating a table
+
 column1 <- c("PMJDY", "Inflation", "GDP", "Health Index", "Income Index", "Education Index", "Employment")
 column2 <- c(n_pmjdy, n_inflation, n_gdp, n_healthindex, n_incomeindex, n_educationindex, n_employment)
 column3 <- c(mean_pmjdy, mean_inflation, mean_gdp, mean_healthindex, mean_incomeindex, mean_eduationindex, mean_employment)
@@ -206,8 +209,7 @@ pmjdy_summarystats <- data.frame(Column1 = column1,
 
 colnames(pmjdy_summarystats) <- column_names
 
-print(pmjdy_summarystats)
-
+kable(pmjdy_summarystats, caption = "Summary Statistics")
 
 ```
 
@@ -351,18 +353,26 @@ eda2 <- ggplot(data_2019, aes(x = educationindex, y = employment, color = state)
   theme(legend.position = "bottom") 
 
 # pmjdy beneficiary rate over 2016 - 2020 
-# Calculating the mean of 'pmjdy' for each year
+# Plotting the mean pmjdy according to mean education index
 annual_means <- df_train %>%
-  group_by(year) %>%
-  summarize(mean_pmjdy = mean(pmjdy, na.rm = TRUE))  
+  filter(year == 2019) %>%
+  mutate(educated = ifelse(educationindex > mean(educationindex), 1, 0)) %>%
+  summarise(mean_pmjdy = mean(pmjdy),
+            educated = mean(educated),
+            .by = state) 
 
-# Plotting the annual mean of 'pmjdy'
-eda3 <- ggplot(annual_means, aes(x = year, y = mean_pmjdy)) +
-  geom_line(color = "blue", size = 1) +  # Adds a blue line connecting the mean values
-  geom_point(color = "red", size = 3) +  # Adds red points for each yearly mean
-  labs(x = "Year", y = "PMJDY", title = "Beneficiary rate of PMJDY from 2016 to 2020") +
-  theme_minimal() +
-  theme(legend.position = "none")  # No need for a legend  
+eda3 <-  ggplot(annual_means, aes(x = reorder(state, mean_pmjdy), y = mean_pmjdy, fill = as.factor(educated))) +
+  geom_bar(stat = "identity", 
+           na.rm = TRUE) +
+  labs(title = "Analysing the the PMJDY take up rate in 2019", 
+       x = "Name of the State", 
+       y = "PMJDY take up rate") +
+  scale_fill_manual(values = c("Cyan3", "Salmon"),
+                    name = "Level of Education",
+                    labels = c("High level of education", "Low level of education")) + 
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 8), 
+        plot.title = element_text(hjust = 0.5,face="bold"))
 
 eda1
 
@@ -376,7 +386,7 @@ The graph titled "Employment vs Literacy in Delhi" shows a scatter plot of emplo
 \
 The graph titled "Employment vs Literacy Across States for 2019" shows the relationship between literacy rates and employment rates across various Indian states. Each colored dot represents a different state, plotted by its literacy rate on the horizontal axis and employment rate on the vertical axis. The overall trend, as indicated by the black trend line, suggests a negative correlation between literacy rates and employment rates. This means that states with higher literacy rates tend to have slightly lower employment rates, although the relationship does not appear very strong, given the spread of the data points across the plot.\
 \
-The graph titled "Beneficiary rate of PMJDY from 2016 - 2020" shows the beneficiary rate of the PMJDY program from 2016 to 2020. The rate began at approximately 20 in 2016, increased in 2017, then significantly dropped in 2018, before rising sharply in 2019 and continuing to increase in 2020. This trend suggests fluctuations in the program's uptake over these years, which might be influenced by various factors such as policy changes, economic conditions, or program awareness campaigns. The steady rise after the drop in 2018 indicates recovery and potentially successful interventions to boost enrollment.
+The graph titled "Analyzing the PMJDY take up rate in 2019" shows the beneficiary rate of the PMJDY program from in 2019 for all states according to their level of education. We can see how states with higher rates of literacy are associated with a higher take up rate of the program, highlighting the importance of education in understanding and utilizing policies. On the other hand, states with lower levels of education are associated with a lower take up rate of PMJDY.
 
 ## Models
 
